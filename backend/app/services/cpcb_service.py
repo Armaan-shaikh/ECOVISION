@@ -10,9 +10,12 @@ Implements India's National Air Quality Index (NAQI / CPCB) Methodology:
 """
 
 from datetime import datetime, timezone
+import logging
 import math
 import urllib.request
 import xml.etree.ElementTree as ET
+
+logger = logging.getLogger(__name__)
 
 USER_AGENT = "EcoVision/1.0 (Environmental Analytics; +https://ecovision.local)"
 CPCB_RSS_URL = "https://airquality.cpcb.gov.in/caaqms/rss_feed"
@@ -157,7 +160,7 @@ def fetch_cpcb_live_xml() -> ET.Element | None:
                 _CPCB_FEED_CACHE["timestamp"] = now
                 return root
     except Exception as e:
-        print(f"Warning: Failed to retrieve live CPCB CAAQMS feed: {e}")
+        logger.warning("Failed to retrieve live CPCB CAAQMS feed: %s", e)
         # If cache exists even if expired, use as fallback during temporary network hiccup
         if _CPCB_FEED_CACHE["root"] is not None:
             return _CPCB_FEED_CACHE["root"]

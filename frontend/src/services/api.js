@@ -11,7 +11,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 export async function fetchHealth() {
   const response = await fetch(`${API_BASE_URL}/health`);
   if (!response.ok) {
-    throw new Error(`Health check failed with status: ${response.status}`);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || `Health check failed (${response.status})`);
   }
   return await response.json();
 }
@@ -24,7 +25,8 @@ export async function searchCities(query) {
   const encoded = encodeURIComponent(query.trim());
   const response = await fetch(`${API_BASE_URL}/cities/search?q=${encoded}`);
   if (!response.ok) {
-    throw new Error(`City search failed with status: ${response.status}`);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || `City search failed (${response.status})`);
   }
   const data = await response.json();
   return data.results || [];
@@ -109,7 +111,8 @@ export async function fetchCityPrediction(city, forceRetrain = false) {
 export async function fetchSavedCities() {
   const response = await fetch(`${API_BASE_URL}/cities/saved`);
   if (!response.ok) {
-    throw new Error(`Failed to load saved cities (${response.status})`);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || `Failed to load saved cities (${response.status})`);
   }
   const data = await response.json();
   return data.cities || [];

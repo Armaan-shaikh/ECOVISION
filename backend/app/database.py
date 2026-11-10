@@ -1,7 +1,10 @@
 import sqlite3
 import os
+import logging
 from datetime import datetime, timezone
 from flask import g, current_app
+
+logger = logging.getLogger(__name__)
 
 def get_db():
     """Get or create database connection for the current request context."""
@@ -9,9 +12,15 @@ def get_db():
         db_path = current_app.config.get("DATABASE_PATH")
         g.db = sqlite3.connect(
             db_path,
-            detect_types=sqlite3.PARSE_DECLTYPES
+            timeout=10.0
         )
         g.db.row_factory = sqlite3.Row
+        # Security & Integrity Pragmas
+        g.db.execute("PRAGMA foreign_keys = ON;")
+        try:
+            g.db.execute("PRAGMA journal_mode = WAL;")
+        except Exception:
+            pass
     return g.db
 
 def close_db(e=None):
@@ -117,15 +126,18 @@ def init_db(app):
         
         conn.commit()
 
-def get_or_create_city(name: str, state: str, country: str, country_code: str, 
-                        latitude: float, longitude: float, tz_name: str = "UTC") -> int:
+def get_or_create_city(name: str, state: str = "", country: str = "", country_code: str = "", 
+                        latitude: float = 0.0, longitude: float = 0.0, tz_name: str = "UTC") -> int:
     """Retrieve an existing city ID or insert a new city if it doesn't exist."""
     db = get_db()
     cursor = db.cursor()
     
-    # Treat empty or None state consistently
-    clean_state = state if state else ""
-    clean_country_code = country_code if country_code else ""
+    # Sanitize and bound text lengths
+    clean_name = str(name)[:100].strip() if name else "Unknown Location"
+    clean_state = str(state)[:100].strip() if state else ""
+    clean_country = str(country)[:100].strip() if country else ""
+    clean_country_code = str(country_code)[:10].strip() if country_code else ""
+    clean_tz = str(tz_name)[:50].strip() if tz_name else "UTC"
     
     # Look for existing city by coordinates or name
     cursor.execute("""
@@ -134,7 +146,7 @@ def get_or_create_city(name: str, state: str, country: str, country_code: str,
            OR (name = ? AND (? = '' OR country = ?))
         ORDER BY id ASC
         LIMIT 1
-    """, (latitude, longitude, name, country, country))
+    """, (latitude, longitude, clean_name, clean_country, clean_country))
     row = cursor.fetchone()
     
     if row:
@@ -144,7 +156,7 @@ def get_or_create_city(name: str, state: str, country: str, country_code: str,
     cursor.execute("""
         INSERT INTO cities (name, state, country, country_code, latitude, longitude, timezone)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (name, clean_state, country, clean_country_code, latitude, longitude, tz_name or "UTC"))
+    """, (clean_name, clean_state, clean_country, clean_country_code, latitude, longitude, clean_tz))
     db.commit()
     return cursor.lastrowid
 
@@ -186,7 +198,11 @@ def save_observation(city_id: int, obs_data: dict, data_source: str = "Open-Mete
         db.commit()
         return cursor.rowcount > 0
     except Exception as e:
-        print(f"Error saving observation to SQLite: {e}")
+        logger.error("Error saving observation to SQLite for city_id %s: %s", city_id, e)
+        try:
+            db.rollback()
+        except Exception:
+            pass
         return False
 
 def get_latest_observation(city_id: int) -> dict | None:
@@ -204,6 +220,11 @@ def get_latest_observation(city_id: int) -> dict | None:
 
 def get_saved_cities(limit: int = 15) -> list[dict]:
     """Retrieve saved cities along with their latest observation time, grouped by coordinates to avoid duplicates."""
+    try:
+        safe_limit = max(1, min(int(limit), 100))
+    except (ValueError, TypeError):
+        safe_limit = 15
+
     db = get_db()
     cursor = db.cursor()
     cursor.execute("""
@@ -216,7 +237,7 @@ def get_saved_cities(limit: int = 15) -> list[dict]:
         GROUP BY ROUND(c.latitude, 2), ROUND(c.longitude, 2)
         ORDER BY MAX(COALESCE(o.observation_time, c.created_at)) DESC
         LIMIT ?
-    """, (limit,))
+    """, (safe_limit,))
     rows = cursor.fetchall()
     return [dict(r) for r in rows]
 
@@ -238,7 +259,8 @@ def check_db_health():
             "monthly_history_count": monthly_count
         }
     except Exception as e:
-        return {"status": "error", "error": str(e)}
+        logger.error("SQLite health check failure: %s", e)
+        return {"status": "error", "message": "Database query execution failed"}
 
 def save_monthly_history(city_id: int, records: list[dict], data_source: str = "Open-Meteo Historical Archive (ERA5 Reanalysis)") -> int:
     """
@@ -284,7 +306,9 @@ def save_monthly_history(city_id: int, records: list[dict], data_source: str = "
             ))
             inserted += 1
         except Exception as err:
-            print(f"Error saving monthly history record: {err}")
+            logger.warning("Error saving monthly history record for city_id %s: %s", city_id, err)
+    db.commit()
+    return inserted
     db.commit()
     return inserted
 

@@ -254,10 +254,11 @@ def compute_overall_environmental_score(indicator_scores: dict) -> dict:
     """
     valid_scores = {}
     for key, weight in WEIGHTS.items():
-        score_obj = indicator_scores.get(key, {})
-        val = score_obj.get("score")
-        if val is not None and score_obj.get("status") == "Valid":
-            valid_scores[key] = (val, weight)
+        score_obj = indicator_scores.get(key)
+        if isinstance(score_obj, dict):
+            val = score_obj.get("score")
+            if val is not None and score_obj.get("status") == "Valid":
+                valid_scores[key] = (val, weight)
 
     valid_count = len(valid_scores)
     

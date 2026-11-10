@@ -5,12 +5,20 @@ Uses Python standard libraries and Pandas for historical aggregation.
 """
 
 import json
+import logging
 import urllib.request
 import urllib.parse
 from datetime import datetime, timezone
 import pandas as pd
 
+logger = logging.getLogger(__name__)
+
 USER_AGENT = "EcoVision-EnvironmentalSystem/1.0 (Educational College Project)"
+
+# Bounded in-memory cache for live environmental data (TTL 5 minutes)
+_LIVE_CACHE: dict[str, dict] = {}
+MAX_LIVE_CACHE_ENTRIES = 64
+LIVE_CACHE_TTL_SECONDS = 300
 
 def search_cities(query: str, limit: int = 5) -> list[dict]:
     """
@@ -46,7 +54,7 @@ def search_cities(query: str, limit: int = 5) -> list[dict]:
                 })
             return cities
     except Exception as e:
-        print(f"Error calling Open-Meteo Geocoding API: {e}")
+        logger.warning("Error calling Open-Meteo Geocoding API: %s", e)
         return []
 
 def get_aqi_category(us_aqi: int | None) -> dict:
@@ -74,7 +82,16 @@ def fetch_environmental_data(latitude: float, longitude: float, tz_name: str = "
     """
     Fetch live weather and air quality observations from Open-Meteo APIs for given coordinates.
     Merges weather (temperature, humidity, rain) and atmospheric data (US AQI, PM2.5, PM10, etc.).
+    Employs 5-minute bounded in-memory caching to avoid redundant external network requests.
     """
+    cache_key = f"{round(latitude, 4)}_{round(longitude, 4)}"
+    now = datetime.now(timezone.utc)
+    
+    if cache_key in _LIVE_CACHE:
+        entry = _LIVE_CACHE[cache_key]
+        if (now - entry["cached_at"]).total_seconds() < LIVE_CACHE_TTL_SECONDS:
+            return entry["data"]
+
     weather_url = (
         f"https://api.open-meteo.com/v1/forecast"
         f"?latitude={latitude}&longitude={longitude}"
@@ -103,7 +120,7 @@ def fetch_environmental_data(latitude: float, longitude: float, tz_name: str = "
             if res_w.status == 200:
                 weather_data = json.loads(res_w.read().decode("utf-8"))
     except Exception as e:
-        print(f"Error fetching Open-Meteo weather: {e}")
+        logger.warning("Error fetching Open-Meteo weather for (%s, %s): %s", latitude, longitude, e)
 
     # Fetch Air Quality
     try:
@@ -112,7 +129,7 @@ def fetch_environmental_data(latitude: float, longitude: float, tz_name: str = "
             if res_aq.status == 200:
                 air_quality_data = json.loads(res_aq.read().decode("utf-8"))
     except Exception as e:
-        print(f"Error fetching Open-Meteo air quality: {e}")
+        logger.warning("Error fetching Open-Meteo air quality for (%s, %s): %s", latitude, longitude, e)
 
     if not weather_data and not air_quality_data:
         return None
@@ -201,12 +218,24 @@ def fetch_environmental_data(latitude: float, longitude: float, tz_name: str = "
     if len(hourly_series) > 36:
         hourly_series = hourly_series[12:48]
 
-    return {
+    result = {
         "current": current_snapshot,
         "hourly_series": hourly_series,
         "data_source": "Open-Meteo Weather API & Copernicus Atmosphere (CAMS)",
         "last_updated": datetime.now(timezone.utc).isoformat()
     }
+
+    # Cache with bounded size eviction
+    if len(_LIVE_CACHE) >= MAX_LIVE_CACHE_ENTRIES:
+        oldest_k = min(_LIVE_CACHE.keys(), key=lambda k: _LIVE_CACHE[k]["cached_at"])
+        _LIVE_CACHE.pop(oldest_k, None)
+
+    _LIVE_CACHE[cache_key] = {
+        "data": result,
+        "cached_at": now
+    }
+
+    return result
 
 def fetch_historical_environmental_data(latitude: float, longitude: float, days: int = 7, tz_name: str = "auto") -> pd.DataFrame:
     """
@@ -243,7 +272,7 @@ def fetch_historical_environmental_data(latitude: float, longitude: float, days:
             if res_w.status == 200:
                 w_data = json.loads(res_w.read().decode("utf-8"))
     except Exception as e:
-        print(f"Error fetching historical weather: {e}")
+        logger.warning("Error fetching historical weather for (%s, %s): %s", latitude, longitude, e)
 
     try:
         req_aq = urllib.request.Request(air_quality_url, headers={"User-Agent": USER_AGENT})
@@ -251,7 +280,7 @@ def fetch_historical_environmental_data(latitude: float, longitude: float, days:
             if res_aq.status == 200:
                 aq_data = json.loads(res_aq.read().decode("utf-8"))
     except Exception as e:
-        print(f"Error fetching historical air quality: {e}")
+        logger.warning("Error fetching historical air quality for (%s, %s): %s", latitude, longitude, e)
 
     if not w_data or "daily" not in w_data:
         return pd.DataFrame()
@@ -322,7 +351,7 @@ def fetch_5year_monthly_history(latitude: float, longitude: float, tz_name: str 
         req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
         with urllib.request.urlopen(req, timeout=35) as response:
             if response.status != 200:
-                print(f"Warning: Open-Meteo archive API returned status {response.status}")
+                logger.warning("Open-Meteo archive API returned status %s for (%s, %s)", response.status, latitude, longitude)
                 return pd.DataFrame()
             data = json.loads(response.read().decode("utf-8"))
 
@@ -362,5 +391,5 @@ def fetch_5year_monthly_history(latitude: float, longitude: float, tz_name: str 
         return monthly_df
 
     except Exception as e:
-        print(f"Error fetching 5-year historical monthly climate data: {e}")
+        logger.warning("Error fetching 5-year historical monthly climate data for (%s, %s): %s", latitude, longitude, e)
         return pd.DataFrame()

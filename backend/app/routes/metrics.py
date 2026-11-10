@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from flask import Blueprint, jsonify
 from ..database import get_saved_cities, get_latest_observation
 from ..services.open_meteo import fetch_environmental_data
+from ..services.rate_limiter import rate_limit
 
 metrics_bp = Blueprint("metrics", __name__)
 
@@ -16,6 +17,7 @@ DEFAULT_CITY = {
 }
 
 @metrics_bp.route("/summary", methods=["GET"])
+@rate_limit(max_requests=60, window_seconds=60.0)
 def get_metrics_summary():
     """
     Return latest verified environmental metrics from SQLite or live Open-Meteo.
@@ -55,6 +57,7 @@ def get_metrics_summary():
     }), 200
 
 @metrics_bp.route("/timeseries", methods=["GET"])
+@rate_limit(max_requests=60, window_seconds=60.0)
 def get_metrics_timeseries():
     """
     Return real 24-hour environmental trend series from Open-Meteo API.

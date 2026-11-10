@@ -8,6 +8,7 @@ Architecture:
 - Per-city in-memory model caching
 """
 
+import time
 from datetime import datetime, timezone
 import numpy as np
 import pandas as pd
@@ -17,8 +18,11 @@ from sklearn.metrics import mean_absolute_error, root_mean_squared_error, r2_sco
 from ..database import get_monthly_history, save_monthly_history, get_or_create_city
 from .open_meteo import fetch_5year_monthly_history
 
-# In-memory cache for trained models and predictions: { cache_key: { "data": ..., "timestamp": ... } }
-_CITY_PREDICTION_CACHE = {}
+# Bounded in-memory cache for trained models and predictions
+MAX_ML_CACHE_ENTRIES = 64
+_CITY_PREDICTION_CACHE: dict[str, dict] = {}
+_LAST_TRAINED_TIMESTAMPS: dict[str, float] = {}
+RETRAIN_COOLDOWN_SECONDS = 30.0 # Prevent CPU exhaustion from rapid retrain spam
 
 FEATURE_COLUMNS = [
     "month",
@@ -347,7 +351,14 @@ def get_or_train_city_prediction(
     8. Caches result and returns JSON-serializable dictionary.
     """
     cache_key = f"{latitude:.3f}_{longitude:.3f}"
+    now_ts = time.time()
     
+    # 1. Cooldown protection against rapid retrain spam
+    last_trained_ts = _LAST_TRAINED_TIMESTAMPS.get(cache_key, 0.0)
+    if force_retrain and (now_ts - last_trained_ts < RETRAIN_COOLDOWN_SECONDS) and cache_key in _CITY_PREDICTION_CACHE:
+        # Re-use recently trained model payload without re-running CPU-heavy Random Forest
+        return _CITY_PREDICTION_CACHE[cache_key]["payload"]
+
     if not force_retrain and cache_key in _CITY_PREDICTION_CACHE:
         cached = _CITY_PREDICTION_CACHE[cache_key]
         cached_age = (datetime.now(timezone.utc) - cached["cached_at"]).total_seconds()
@@ -446,10 +457,16 @@ def get_or_train_city_prediction(
         "disclaimer": DISCLAIMER_NOTICE
     }
 
+    # Bounded cache eviction to prevent unbounded memory growth
+    if len(_CITY_PREDICTION_CACHE) >= MAX_ML_CACHE_ENTRIES:
+        oldest_key = min(_CITY_PREDICTION_CACHE.keys(), key=lambda k: _CITY_PREDICTION_CACHE[k]["cached_at"])
+        _CITY_PREDICTION_CACHE.pop(oldest_key, None)
+
     # Cache payload
     _CITY_PREDICTION_CACHE[cache_key] = {
         "payload": payload,
         "cached_at": datetime.now(timezone.utc)
     }
+    _LAST_TRAINED_TIMESTAMPS[cache_key] = now_ts
 
     return payload

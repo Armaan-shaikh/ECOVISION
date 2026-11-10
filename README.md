@@ -272,3 +272,66 @@ npm run dev
 - `GET /api/cities/saved` — List of stored cities in SQLite with recent observations.
 - `GET /api/metrics/summary` — Default location environmental summary.
 - `GET /api/metrics/timeseries` — Default 24-hour environmental trend series.
+
+---
+
+## 🔒 Security Hardening & Code Quality
+
+EcoVision includes robust, production-grade security controls designed to protect against injection, denial of service, resource exhaustion, and sensitive information leakage:
+
+### 1. Environment & Secrets Management
+- **Zero Hardcoded Secrets:** No API keys, passwords, or credentials are hardcoded in the codebase or stored in git history.
+- **Config Separation:** Distinct `DevelopmentConfig`, `ProductionConfig`, and `TestingConfig` classes in `backend/app/config.py`.
+- **Debug Disabled by Default:** `DEBUG = False` and `TESTING = False` by default. Startup validation immediately terminates the process if `FLASK_DEBUG=True` in production.
+- **Strict Host Binding:** Defaults to loopback `127.0.0.1` preventing unintended external interface exposure.
+
+### 2. Cross-Origin Resource Sharing (CORS) Security
+- **Strict Origin Whitelist:** In development, only approved local frontend ports (`http://localhost:5173`, `http://127.0.0.1:5173`, etc.) are permitted.
+- **Wildcard Rejection in Production:** Setting `CORS_ORIGINS=*` or leaving origins empty in production raises a fatal configuration exception on startup.
+
+### 3. API Endpoint Hardening & Input Validation
+- **Coordinate Sanitization:** All incoming latitude and longitude parameters are strictly validated via `backend/app/services/validators.py`:
+  - Enforces finite float types (strictly rejects `NaN`, `+Infinity`, `-Infinity`, and non-numeric inputs).
+  - Validates geographical ranges: $-90.0 \le \text{lat} \le 90.0$ and $-180.0 \le \text{lon} \le 180.0$.
+- **City Search Query Bounding:** City search queries are stripped of control characters, bounded between 2 and 100 characters, and sanitized against script tags.
+- **Payload Bounding:** Global request payload cap enforced via `MAX_CONTENT_LENGTH = 1MB` to prevent memory-exhaustion DoS attacks.
+- **Analysis Parameter Validation:** The `days` parameter is strictly checked against allowed values `(7, 14, 30)` and database queries clamp `limit` to safe maximums ($1 \le \text{limit} \le 100$).
+
+### 4. Zero-Dependency Rate Limiting
+- **Sliding-Window Rate Limiter:** Implemented in `backend/app/services/rate_limiter.py` using thread-safe in-memory sliding windows per client IP.
+- **HTTP 429 & Retry-After:** Returns standard HTTP 429 status with user-friendly retry guidance and `Retry-After` response headers.
+- **CPU Exhaustion Defense:** ML retraining endpoint is protected by a 30-second cooldown timer (`RETRAIN_COOLDOWN_SECONDS`) preventing malicious CPU exhaustion from rapid retrain spam.
+
+### 5. Database Hardening (SQLite)
+- **100% Parameterized Queries:** Every database interaction strictly utilizes parameterized queries (`?` placeholders). SQL injection strings cannot alter query logic or execute stacked statements.
+- **Pragmas & Integrity:** Enforces `PRAGMA foreign_keys = ON;` and WAL (`Write-Ahead Logging`) mode with a 10.0-second busy timeout to prevent database locks.
+- **Error Masking:** Database exceptions are caught, logged internally, rolled back, and masked from user responses.
+
+### 6. Centralized Logging & Error Sanitization
+- **Standardized Python Logging:** Standard library `logging` replaces scattered `print()` calls with formatted timestamps, log levels, and module names.
+- **Uniform JSON Error Envelopes:** Global error handlers (400, 404, 405, 413, 429, 500) ensure internal stack traces, local system paths, and raw database errors are never exposed in HTTP responses.
+- **Security Response Headers:** Every HTTP response includes:
+  - `X-Content-Type-Options: nosniff`
+  - `X-Frame-Options: DENY`
+  - `X-XSS-Protection: 1; mode=block`
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `Cache-Control: no-store, max-age=0` (for dynamic JSON endpoints)
+
+### 7. Dependency & Security Audits
+Both backend and frontend dependencies are audited against known vulnerability databases:
+```powershell
+# Python backend vulnerability audit
+.\backend\venv\Scripts\python.exe -m pip_audit
+
+# Node.js frontend vulnerability audit
+npm --prefix frontend audit
+```
+* **Backend Status:** 0 known vulnerabilities (`pip-audit` verified).
+* **Frontend Status:** 0 known vulnerabilities (`npm audit` verified).
+
+### 8. Automated Security Test Suite
+The backend includes a dedicated security test suite covering validation, rate limiting, SQL injection defense, and error sanitization:
+```powershell
+.\backend\venv\Scripts\python.exe -m unittest discover -s backend/tests -p "test_*.py"
+```
+* **Coverage:** 26 automated unit and security tests executing in $< 0.5$ seconds.
