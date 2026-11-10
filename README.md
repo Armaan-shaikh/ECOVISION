@@ -1,6 +1,16 @@
 # EcoVision – City Environmental Monitoring, Analysis and Prediction System
 
-EcoVision is an urban environmental intelligence platform engineered for real-time meteorological and air quality telemetry ingestion, atmospheric dispersion analysis, and SQLite-backed environmental persistence.
+[![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-3.1-000000?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![React](https://img.shields.io/badge/React-19.0-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.6-F7931E?logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+[![Tests](https://img.shields.io/badge/Tests-36%20Passed-success)](backend/tests/)
+[![Vulnerabilities](https://img.shields.io/badge/Vulnerabilities-0%20(pip%20%26%20npm)-brightgreen)](https://github.com/Armaan-shaikh/ECOVISION)
+
+EcoVision is an urban environmental intelligence platform engineered for real-time meteorological and air quality telemetry ingestion, atmospheric dispersion analysis, explainable machine-learning climate forecasting, and SQLite-backed environmental persistence.
 
 ---
 
@@ -8,330 +18,388 @@ EcoVision is an urban environmental intelligence platform engineered for real-ti
 
 | Layer | Technologies | Purpose |
 |---|---|---|
-| **Frontend** | React 19, Vite, Tailwind CSS v4, Lucide Icons | Understated dark forest green glassmorphic environmental dashboard |
-| **Data Visualization** | Recharts | 24-hour dynamic telemetry (AQI, PM2.5, PM10, Temp, Humidity, Rain, Trace Gases) |
-| **Backend API** | Python 3.12, Flask, Flask-CORS | Modular application factory API, REST endpoints |
-| **Database** | SQLite3 | Local embedded persistence for cities and historical observations |
-| **Data Collection** | Open-Meteo Environmental APIs | Real-time geocoding, meteorological forecasts, and Copernicus CAMS atmospheric data |
-| **Data Analysis** | Pandas, NumPy | Statistical variance, rolling metrics, and Z-score outlier detection |
-| **Machine Learning** | Scikit-learn | Predictive regression models (prepared for future development phase) |
+| **Frontend Presentation** | React 19, Vite 6, Tailwind CSS v4, Lucide Icons | Dark forest emerald glassmorphic environmental dashboard with responsive layouts |
+| **Data Visualization** | Recharts | 24-hour hourly telemetry, 7-day rolling trends, and 6-month predictive corridors |
+| **Backend REST API** | Python 3.12, Flask, Flask-CORS | Modular application factory API, Blueprints, sliding-window rate limiting |
+| **Database Persistence** | SQLite 3 (WAL Mode) | Embedded relational persistence for cities, observations, and monthly reanalysis |
+| **Ground Sensor Ingestion** | Central Pollution Control Board (CPCB) | Official CAAQMS XML RSS live telemetry, Haversine matching, statutory Indian NAQI |
+| **Meteorological & Grids** | Open-Meteo & Copernicus CAMS | Global geocoding, real-time weather forecasts, and chemical transport reanalysis |
+| **Machine Learning** | Scikit-learn (`RandomForestRegressor`) | 5-year ERA5 historical training, chronological holdout split, 6-month recursive forecast |
+| **Security & Quality** | Zero-dependency In-Memory Limiter, Validators | IEEE 754 float sanitization, CORS whitelisting, payload caps, exception masking |
 
 ---
 
-## 📂 Project Structure
+## 🎓 Academic Thesis & Technical Monograph
+
+EcoVision is accompanied by an engineering thesis and technical monograph documenting the system architecture, mathematical derivations, database design, machine learning pipelines, and file-by-file code analyses:
+
+* 📄 **Complete PDF Thesis (132 Pages):** [`docs/thesis/EcoVision_Complete_Project_Thesis.pdf`](docs/thesis/EcoVision_Complete_Project_Thesis.pdf)
+* 📝 **Complete Markdown Source (4,690 Lines):** [`docs/thesis/EcoVision_Thesis_Source.md`](docs/thesis/EcoVision_Thesis_Source.md)
+
+---
+
+## 🛠️ Prerequisites & Required Tools
+
+Before cloning and running EcoVision, ensure your system has the following tools installed:
+
+| Tool | Minimum Version | Recommended | Verification Command | Purpose |
+|---|---|---|---|---|
+| **Git** | `2.30+` | `2.40+` | `git --version` | Cloning and version control |
+| **Python** | `3.10+` | `3.12.x` | `python --version` (or `py --version`) | Backend Flask API & Scikit-learn runtime |
+| **Node.js** | `18.x LTS` | `20.x+ LTS` | `node -v` | Frontend React & Vite build tooling |
+| **npm** | `9.x+` | `10.x+` | `npm -v` | Node package dependency management |
+| **Web Browser** | Any modern | Chrome / Edge / Firefox | N/A | Accessing the React dashboard |
+
+> [!NOTE]
+> **Operating System Compatibility:** EcoVision is fully cross-platform and runs on **Windows 10/11**, **Linux** (Ubuntu, Debian, Fedora, Arch), and **macOS** (Apple Silicon / Intel).
+
+---
+
+## 📦 Step-by-Step Installation & Execution Guide
+
+Follow this guide to clone the repository from GitHub and launch both the backend and frontend servers on your local machine.
+
+### Step 1: Clone the Repository
+
+Open your terminal (PowerShell, Command Prompt, or Bash) and clone the repository:
+
+```bash
+# Clone the repository from GitHub
+git clone https://github.com/Armaan-shaikh/ECOVISION.git
+
+# Navigate into the project root directory
+cd ECOVISION
+```
+
+---
+
+### Step 2: Backend Setup (Python Flask)
+
+#### 2.1 Navigate to the Backend Directory
+```bash
+cd backend
+```
+
+#### 2.2 Create a Python Virtual Environment
+Creating an isolated virtual environment prevents library conflicts with your system Python:
+
+* **On Windows (PowerShell / Command Prompt):**
+  ```powershell
+  python -m venv venv
+  ```
+* **On Linux / macOS (Bash / Zsh):**
+  ```bash
+  python3 -m venv venv
+  ```
+
+#### 2.3 Activate the Virtual Environment
+* **On Windows (PowerShell):**
+  ```powershell
+  .\venv\Scripts\Activate.ps1
+  ```
+  *(If you encounter a script execution restriction, run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` first).*
+* **On Windows (Command Prompt `cmd.exe`):**
+  ```cmd
+  venv\Scripts\activate.bat
+  ```
+* **On Linux / macOS:**
+  ```bash
+  source venv/bin/activate
+  ```
+
+#### 2.4 Upgrade Pip and Install Dependencies
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+#### 2.5 Configure the Environment File
+Create a local `.env` configuration file from the provided `.env.example`:
+
+* **On Windows:**
+  ```cmd
+  copy .env.example .env
+  ```
+* **On Linux / macOS:**
+  ```bash
+  cp .env.example .env
+  ```
+
+*(The default `.env` settings are pre-configured for local development and bind safely to `127.0.0.1:5000` with CORS enabled for `http://localhost:5173`).*
+
+#### 2.6 Start the Flask Backend Server
+```bash
+python run.py
+```
+
+* The backend WSGI server will initialize and report:
+  ```
+  ======================================================================
+  ECOVISION BACKEND SERVER INITIALIZED
+  ======================================================================
+  * Environment: development
+  * Server Host: 127.0.0.1
+  * Server Port: 5000
+  * Database:    ecovision.db (WAL Mode Enabled)
+  ======================================================================
+  ```
+* **Health Check:** Open your browser or run `curl http://127.0.0.1:5000/api/health` to confirm the backend and SQLite database are active.
+
+---
+
+### Step 3: Frontend Setup (React Vite)
+
+Open a **second terminal window** and navigate to the project root directory (`ECOVISION`).
+
+#### 3.1 Navigate to the Frontend Directory
+```bash
+cd frontend
+```
+
+#### 3.2 Install Node.js Dependencies
+```bash
+npm install
+```
+
+#### 3.3 Start the Vite Development Server
+```bash
+npm run dev
+```
+
+* Vite will compile the React modules and display the local development URL:
+  ```
+  VITE v6.x.x  ready in 250 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+  ```
+
+#### 3.4 Open EcoVision in Your Browser
+Navigate to **`http://localhost:5173`** in your browser.
+
+1. Type any city name into the **City Search** bar (e.g. `Delhi`, `Bengaluru`, `Nagpur`, `London`, `Tokyo`, `New York`).
+2. Observe live meteorological KPIs, dual Indian NAQI / Copernicus CAMS air quality telemetry, and trace gases.
+3. Scroll to **Prediction Centre** and click **Attempt Model Fit** to train an explainable Scikit-learn `RandomForestRegressor` on 5-year historical reanalysis and view the 6-month recursive forecast corridor.
+4. Click the **Bookmark / Save City** button to test SQLite persistence.
+
+---
+
+### Step 4: Quick Launchers (Windows Users)
+
+For Windows users who prefer one-click startup without manually opening multiple terminals:
+
+1. Double-click **`run_backend.bat`** in the repository root to start the Flask API.
+2. Double-click **`run_frontend.bat`** in the repository root to start the React Vite server.
+3. Open `http://localhost:5173`.
+
+---
+
+## 🧪 Running Automated Tests & Verification
+
+EcoVision includes comprehensive automated test suites covering functional workflows, CPCB station parsing, Haversine matching, input validation, rate limiting, and SQL injection defense.
+
+### 1. Run Backend Automated Test Suite (36 Tests)
+Activate the backend virtual environment and execute:
+
+```bash
+# Run all 36 test cases across unit, integration, and security suites
+python -m unittest discover -s backend/tests -v
+```
+
+* **Expected Result:** `Ran 36 tests in ~0.8s ... OK (100% Pass Rate)`.
+
+### 2. Verify Frontend Production Build
+```bash
+cd frontend
+npm run build
+```
+
+* **Expected Result:** Vite transforms 2,600+ modules and produces optimized production bundles in `frontend/dist/` with 0 errors.
+
+### 3. Run Security & Vulnerability Audits
+```bash
+# Backend Python dependency audit
+pip-audit
+
+# Frontend Node.js dependency audit
+npm --prefix frontend audit
+```
+
+* **Expected Result:** `0 known vulnerabilities` across all production dependencies.
+
+---
+
+## 📂 Project Directory Structure
 
 ```
-d:\ECOMETER\
-├── backend/
+ECOVISION/
+├── docs/
+│   └── thesis/
+│       ├── EcoVision_Complete_Project_Thesis.pdf    # 132-page comprehensive academic monograph
+│       └── EcoVision_Thesis_Source.md               # 4,690-line unabridged Markdown thesis source
+│
+├── backend/                                         # Python Flask REST API & Machine Learning
 │   ├── app/
 │   │   ├── routes/
 │   │   │   ├── __init__.py
-│   │   │   ├── health.py                     # /api/health endpoint with SQLite & API diagnostics
-│   │   │   ├── metrics.py                    # /api/metrics/summary & timeseries endpoints
-│   │   │   └── environmental.py              # /api/cities/search, /api/environmental/data, /api/environmental/analysis
+│   │   │   ├── health.py                            # /api/health probe with SQLite & API diagnostics
+│   │   │   ├── metrics.py                           # /api/metrics/summary & timeseries endpoints
+│   │   │   └── environmental.py                     # /api/cities/*, /api/environmental/*
 │   │   ├── services/
 │   │   │   ├── __init__.py
-│   │   │   ├── cpcb_service.py               # Official CPCB CAAQMS ground station ingestion, breakpoints & completeness validation
-│   │   │   ├── open_meteo.py                 # Open-Meteo geocoding, real-time weather, air quality & ERA5 historical archive client
-│   │   │   ├── analysis_service.py           # Environmental Indicator Scoring, Pandas historical trends, insights & recommendations
-│   │   │   ├── data_service.py               # Statistical variance, rolling metrics, and outlier detection
-│   │   │   └── ml_service.py                 # Scikit-learn RandomForestRegressor time-series climate forecasting & recursive projection
-│   │   ├── __init__.py                       # Flask app factory & CORS configuration
-│   │   ├── config.py                         # Environment configuration
-│   │   └── database.py                       # SQLite connection manager, schema, and deduplication
+│   │   │   ├── cpcb_service.py                      # CPCB CAAQMS XML RSS ingestion, Haversine & NAQI
+│   │   │   ├── open_meteo.py                        # Open-Meteo weather, air quality & ERA5 client
+│   │   │   ├── analysis_service.py                  # EIS scoring, rolling trends, insights engine
+│   │   │   ├── data_service.py                      # SQLite persistence & query operations
+│   │   │   ├── ml_service.py                        # RandomForestRegressor 6-month climate predictor
+│   │   │   ├── rate_limiter.py                      # Thread-safe sliding-window rate limiter
+│   │   │   └── validators.py                        # IEEE 754 float & coordinate sanitizers
+│   │   ├── __init__.py                              # Flask application factory (create_app)
+│   │   ├── config.py                                # Dev, Testing, and Production configs
+│   │   └── database.py                              # SQLite connection manager, WAL mode & DDL
 │   ├── tests/
 │   │   ├── __init__.py
-│   │   └── test_cpcb_and_aqi.py              # Automated test suite for CPCB calculation, categories & completeness
-│   ├── venv/                                 # Python 3.12 virtual environment
-│   ├── requirements.txt                      # Backend dependencies
-│   ├── run.py                                # Server entry point (http://127.0.0.1:5000)
-│   ├── ecovision.db                          # SQLite database storing cities, observations, and monthly reanalysis
-│   └── .env.example                          # Environment configuration template
+│   │   ├── run_live_smoke_test.py                   # Live HTTP loopback integration runner
+│   │   ├── test_cpcb_and_aqi.py                     # CPCB parsing, Haversine & AQI tests (7)
+│   │   ├── test_functional_regression.py            # Functional API regression tests (13)
+│   │   └── test_security_and_hardening.py           # Security, rate limit & float tests (16)
+│   ├── requirements.txt                             # Audited Python dependency manifest
+│   ├── run.py                                       # WSGI server entrypoint (http://127.0.0.1:5000)
+│   ├── ecovision.db                                 # Embedded SQLite production/dev database
+│   └── .env.example                                 # Environment configuration template
 │
-├── frontend/
+├── frontend/                                        # React 19 Client Presentation Layer
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── layout/
-│   │   │   │   └── Navbar.jsx                        # Header with live Flask & SQLite status indicator
+│   │   │   │   └── Navbar.jsx                       # Header with live Flask & SQLite status indicator
 │   │   │   └── dashboard/
-│   │   │       ├── CitySearch.jsx                    # Global city search with Open-Meteo geocoding
-│   │   │       ├── CityHeader.jsx                    # Active municipality header, coords & data source
-│   │   │       ├── MetricCard.jsx                    # Environmental KPI cards with health benchmarks
-│   │   │       ├── EnvironmentalChart.jsx            # 24-hr Recharts area & line series with multi-tab selector
-│   │   │       ├── PollutantBreakdown.jsx            # Trace gases grid (NO2, SO2, CO, Ozone, European AQI)
-│   │   │       ├── EnvironmentalScoringCard.jsx      # Overall Environmental Indicator Score (0-100) & criteria breakdown
-│   │   │       ├── HistoricalTrendsView.jsx          # Multi-day trends (7d/14d/30d) with Recharts charts & weekly table
-│   │   │       ├── InsightsAndRecommendations.jsx    # Rule-based findings & targeted action advisories
-│   │   │       ├── PredictionCenter.jsx              # Machine learning 6-month forecast, RF vs baseline charts & KPI metrics
-│   │   │       ├── DatabaseSavedCities.jsx           # SQLite persisted cities viewer
-│   │   │       ├── BackendStatusPanel.jsx            # System engine diagnostics
-│   │   │       └── UnavailableDataAlert.jsx          # Clear message when telemetry is missing
+│   │   │       ├── CitySearch.jsx                   # Debounced autocomplete search dropdown
+│   │   │       ├── CityHeader.jsx                   # Active municipality header & data provenance
+│   │   │       ├── MetricCard.jsx                   # Environmental KPI cards with health benchmarks
+│   │   │       ├── EnvironmentalChart.jsx           # 24-hr Recharts area & line series with multi-tab selector
+│   │   │       ├── PollutantBreakdown.jsx           # 7 chemical pollutants & monitoring station tag
+│   │   │       ├── EnvironmentalScoringCard.jsx     # Radial EIS gauge (0-100) & sub-criteria breakdown
+│   │   │       ├── HistoricalTrendsView.jsx         # 7-day longitudinal telemetry view & weekly table
+│   │   │       ├── InsightsAndRecommendations.jsx   # Rule-based health advisories & action guidance
+│   │   │       ├── PredictionCenter.jsx             # ML 6-month forecast, RF vs baseline charts & metrics
+│   │   │       ├── DatabaseSavedCities.jsx          # SQLite persisted bookmark drawer
+│   │   │       ├── BackendStatusPanel.jsx           # Real-time backend engine diagnostics
+│   │   │       └── UnavailableDataAlert.jsx         # Informative fallback banner when sensors are offline
 │   │   ├── services/
-│   │   │   └── api.js                                # Frontend-to-backend API client
-│   │   ├── App.jsx                                   # Main dashboard page
-│   │   ├── index.css                                 # Tailwind styling & dark forest aesthetic
-│   │   └── main.jsx                                  # React DOM entry point
-│   ├── index.html                                    # Document header & EcoVision branding
-│   ├── vite.config.js                                # Vite config with /api proxy to Flask
-│   └── package.json                                  # Frontend dependencies
+│   │   │   └── api.js                               # Unified Axios/Fetch API client with race-condition guards
+│   │   ├── App.jsx                                  # Master dashboard layout & state orchestrator
+│   │   ├── index.css                                # Tailwind CSS v4 directives & glassmorphic tokens
+│   │   └── main.jsx                                 # React DOM bootstrap mount
+│   ├── index.html                                   # HTML5 host document & metadata
+│   ├── vite.config.js                               # Vite build configuration with /api reverse proxy
+│   └── package.json                                 # Frontend package manifest & scripts
 │
-├── .gitignore                                        # Git ignore rules for Python & Node.js
-├── README.md                                         # Project documentation
-├── run_backend.bat                                   # One-click launcher for Flask backend
-└── run_frontend.bat                                  # One-click launcher for React Vite frontend
+├── .gitignore                                       # Exclusion rules for Python, Node, caches, and secrets
+├── README.md                                        # Master project manual & getting started guide
+├── run_backend.bat                                  # Windows one-click batch launcher for Flask API
+└── run_frontend.bat                                 # Windows one-click batch launcher for React Vite
 ```
 
 ---
 
-## 🌐 External APIs Integrated
+## 🔍 Verified REST API Endpoints Matrix
 
-1. **Open-Meteo Geocoding API**
-   - Endpoint: `https://geocoding-api.open-meteo.com/v1/search?name={name}&count=5&language=en&format=json`
-   - Purpose: Resolves city names worldwide into latitude, longitude, country, state/region, and local timezone.
-2. **Open-Meteo Weather Forecast API**
-   - Endpoint: `https://api.open-meteo.com/v1/forecast`
-   - Purpose: Real-time and hourly ambient temperature, relative humidity, precipitation, rainfall, and wind speed.
-3. **Open-Meteo Air Quality (Copernicus CAMS) API**
-   - Endpoint: `https://air-quality-api.open-meteo.com/v1/air-quality`
-   - Purpose: Standard US EPA Air Quality Index (0–500 scale), European AQI, PM2.5, PM10, Nitrogen Dioxide (NO2), Sulphur Dioxide (SO2), Carbon Monoxide (CO), and Ozone (O3).
-4. **Open-Meteo Historical Weather Archive API**
-   - Endpoint: `https://archive-api.open-meteo.com/v1/archive`
-   - Purpose: Multi-year atmospheric reanalysis (ERA5 / ERA5-Land) delivering daily temperature and precipitation records aggregated into monthly climate training datasets.
-
-> **Standard AQI Scale Compliance:** The dashboard strictly reports the **US EPA Air Quality Index** (0–500 scale) as the primary benchmark and identifies it clearly. Modelled Copernicus CAMS data is transparently attributed and never misrepresented as local on-site physical hardware sensors.
+| HTTP Method | Endpoint URI | Description | Parameters | Sample Success Response |
+|---|---|---|---|---|
+| `GET` | `/api/health` | Backend & database health probe | None | `{"status": "healthy", "database": "connected"}` |
+| `GET` | `/api/cities/search` | Geocoding city autocomplete | `q` (string, min 2 chars) | `{"cities": [{"name": "Delhi", "lat": 28.61, ...}]}` |
+| `GET` | `/api/environmental/data` | Real-time weather, AQI & gases | `lat`, `lon`, `name` | `{"weather": {...}, "air_quality": {...}}` |
+| `GET` | `/api/environmental/analysis` | EIS composite score & trends | `lat`, `lon`, `days` (7/14/30) | `{"score": 82.4, "trends": {...}, "insights": [...]}` |
+| `GET` | `/api/environmental/prediction`| 6-month Random Forest forecast | `lat`, `lon`, `force_retrain` | `{"projections": [...], "metrics": {"mae": 0.82}}` |
+| `GET` | `/api/cities/saved` | List bookmarked cities | None | `{"saved_cities": [{"id": 1, "name": "Delhi"}]}` |
+| `POST`| `/api/cities/saved` | Bookmark/persist a city | JSON body: `{name, lat, lon}` | `{"message": "City saved successfully", "id": 1}` |
+| `DELETE`| `/api/cities/saved/<id>` | Remove municipal bookmark | `id` (integer) | `{"message": "City removed from saved list"}` |
 
 ---
 
-## 🗄️ SQLite Database Schema
+## 🌐 Dual AQI Standard & Data Provenance
 
-### `cities` Table
-Stores unique municipalities searched or selected by users:
-- `id` (INTEGER PRIMARY KEY AUTOINCREMENT)
-- `name` (TEXT NOT NULL)
-- `state` (TEXT)
-- `country` (TEXT NOT NULL)
-- `country_code` (TEXT)
-- `latitude` (REAL NOT NULL)
-- `longitude` (REAL NOT NULL)
-- `timezone` (TEXT)
-- `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
-- **Constraint:** `UNIQUE(name, state, country)` prevents duplicate city entries.
+EcoVision implements an academically rigorous, dual-standard environmental ingestion architecture:
 
-### `environmental_observations` Table
-Stores timestamped environmental observations:
-- `id` (INTEGER PRIMARY KEY AUTOINCREMENT)
-- `city_id` (INTEGER NOT NULL, FOREIGN KEY REFERENCES cities(id))
-- `observation_time` (TEXT NOT NULL)
-- `temperature`, `relative_humidity`, `precipitation`, `rain`, `wind_speed` (REAL)
-- `aqi` (INTEGER - US EPA scale), `aqi_scale` (TEXT DEFAULT 'US EPA')
-- `european_aqi` (INTEGER)
-- `pm25`, `pm10`, `no2`, `so2`, `co`, `ozone` (REAL)
-- `data_source` (TEXT)
-- `recorded_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
-- **Constraint:** `UNIQUE(city_id, observation_time)` prevents duplicate API records.
+### 1. Indian Municipalities (CPCB National Air Quality Index)
+* **Data Source:** Official Central Pollution Control Board (CPCB) Continuous Ambient Air Quality Monitoring Stations (CAAQMS) XML RSS live feeds.
+* **Station Matching:** Haversine great-circle geodesic formula selects the nearest active physical monitoring station within statutory radii.
+* **Calculation:** Statutory piecewise linear sub-index interpolation across 8 criteria pollutants ($\text{PM}_{2.5}$, $\text{PM}_{10}$, $\text{NO}_2$, $\text{SO}_2$, $\text{CO}$, $\text{O}_3$, $\text{NH}_3$, $\text{Pb}$).
+* **Completeness Rule:** Requires a minimum of 3 valid pollutant sub-indices, with at least one particulate parameter ($\text{PM}_{2.5}$ or $\text{PM}_{10}$) mandatory.
+* **Provenance Tag:** The dashboard explicitly displays `Source: CPCB Ground Station (<Station Name>)` alongside the station's exact physical coordinates.
 
-### `city_monthly_history` Table
-Stores 5-year aggregated historical climate reanalysis for ML training:
-- `id` (INTEGER PRIMARY KEY AUTOINCREMENT)
-- `city_id` (INTEGER NOT NULL, FOREIGN KEY REFERENCES cities(id))
-- `year` (INTEGER NOT NULL)
-- `month` (INTEGER NOT NULL)
-- `year_month` (TEXT NOT NULL)
-- `temperature_mean`, `temperature_min`, `temperature_max`, `precipitation_sum` (REAL)
-- `data_source` (TEXT DEFAULT 'Open-Meteo Historical Archive (ERA5 Reanalysis)')
-- `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
-- **Constraint:** `UNIQUE(city_id, year, month)` prevents duplicate monthly downloads and serves as an offline climate cache.
+### 2. International Municipalities (Copernicus CAMS & US EPA AQI)
+* **Data Source:** European Centre for Medium-Range Weather Forecasts (ECMWF) Copernicus Atmosphere Monitoring Service (CAMS) 0.4° reanalysis grid via Open-Meteo.
+* **Standard:** Standard United States Environmental Protection Agency (US EPA) Air Quality Index (0–500 scale).
+* **Provenance Tag:** Explicitly marked as `Copernicus CAMS Atmospheric Reanalysis Model`, prohibiting false claims of on-site physical hardware deployment.
 
 ---
 
-## 📊 Step 3: Environmental Analysis Module
+## 📊 Environmental Indicator Scoring (EIS) Engine
 
-EcoVision includes a transparent, rule-based environmental analysis engine designed without opaque AI black boxes or external LLM dependencies.
+The Environmental Indicator Score (EIS) is a transparent, multi-criteria normalization framework that maps multi-modal telemetry onto an intuitive **0–100 scale** (where 100 represents optimal environmental quality):
 
-### 1. Environmental Indicator Scoring (EIS)
-All valid parameters are normalized onto an intuitive **0–100 scale** (where 100 represents optimal environmental quality):
-
-| Indicator | Weight | Raw Ideal Range | Scoring Normalization Logic |
+| Indicator | Weight | Raw Ideal Range | Mathematical Normalization Logic |
 |---|---|---|---|
-| **Air Quality (US EPA AQI)** | 35% | 0–50 (Good) | Piecewise linear mapping from EPA AQI breakpoints: AQI ≤ 50 $\rightarrow$ 90–100; AQI 51–100 $\rightarrow$ 70–89.9; AQI 101–150 $\rightarrow$ 50–69.9; AQI > 300 $\rightarrow$ 0–19.9. |
-| **Ambient Temperature** | 25% | 18–24°C | Human-thermal comfort curve: 18–24°C scores 100; mild summer warmth (24–28°C) scores 78–90 (not penalized as bad); extreme heat (>36°C) or freezing (<0°C) scores < 40. |
-| **Relative Humidity** | 20% | 40–60% | Gaussian-style bell curve centered at 50%: drops gently as air becomes overly arid (< 30%) or muggy (> 75%). |
-| **Rainfall / Precipitation** | 20% | 0.5–8.0 mm | Cleansing shower rain scores 90–100; dry days score 75 (stable/neutral); severe storm runoff (> 25 mm) scores down to 25 due to urban flooding risks. |
+| **Air Quality** | 35% | 0–50 (Good) | Piecewise mapping: AQI $\le 50 \rightarrow 90\text{--}100$; AQI $51\text{--}100 \rightarrow 70\text{--}89.9$; AQI $> 300 \rightarrow 0\text{--}19.9$. |
+| **Ambient Temperature** | 25% | 18–24°C | Human-thermal comfort curve: $18\text{--}24^\circ\text{C}$ scores 100; mild warmth ($24\text{--}28^\circ\text{C}$) scores $78\text{--}90$; extreme heat ($>36^\circ\text{C}$) scores $< 40$. |
+| **Relative Humidity** | 20% | 40–60% | Gaussian-style bell curve centered at 50%: decays gracefully as air becomes arid ($< 30\%$) or excessively muggy ($> 75\%$). |
+| **Precipitation** | 20% | 0.5–8.0 mm | Cleansing rain scores $90\text{--}100$; dry conditions score 75 (neutral); severe storm runoff ($> 25\text{ mm}$) scores down to 25 due to urban flooding. |
 
-#### Composite Score & Missing Data Rules:
-- **Strict Data Sufficiency:** A composite overall score is calculated **only when at least 3 of the 4 indicators are valid**. If fewer than 3 valid indicators exist, the system returns `None` and reports `"Insufficient Data"`.
-- **Never Treat Missing Data as Zero:** When an indicator is missing, its value remains `None` and its weight is dynamically re-allocated proportionally among available valid indicators. Missing data is never substituted with 0.
-- **Transparency Disclaimer:** The score is explicitly labeled as a *project-defined environmental indicator*, not an official statutory health index.
-
-### 2. Historical Trend Analysis
-- **Periods Supported:** 7 Days, 14 Days, and 30 Days.
-- **Data Ingestion:** Retrieved from Open-Meteo Weather Forecast/Archive and Copernicus CAMS Air Quality APIs without fabricating missing values.
-- **Pandas & NumPy Processing:**
-  - Daily mean, min, and max temperatures, precipitation sums, and mean US EPA AQI.
-  - 7-day calendar rolling weekly aggregations.
-  - Temperature trend direction ($\Delta T = T_{\text{recent}} - T_{\text{baseline}}$).
-  - Rainfall pattern analysis (total rainfall, wet days count, precipitation frequency).
-  - AQI trend classification (improving, degrading, or stable).
-  - Exact data coverage reporting (e.g. 7/7 days, 100% coverage).
-
-### 3. Rule-Based Insights Engine
-Produces data-backed environmental insights linked directly to observed telemetry:
-- **Air Quality Assessment:** US EPA AQI classification with health category.
-- **Thermal Dynamics:** Historical mean temperature and period temperature delta.
-- **Precipitation Profile:** Cumulative precipitation volume and wet days count.
-- **Particulate Health Exposure:** PM2.5 assessment against WHO guidelines (15 µg/m³ 24-hr threshold).
-
-### 4. Targeted Action Recommendations
-Generates municipal and citizen advisories mapped to measured conditions:
-- **Active Transit & Recreation:** Safe windows for outdoor activities when AQI is favorable.
-- **Sensitive Group Alerts:** Guidance for vulnerable populations when PM2.5 or AQI is elevated.
-- **Urban Heat Mitigation:** Shade, hydration, and green canopy recommendations during warming trends.
-- **Stormwater & Catchment:** Infrastructure drainage advisories during high rainfall periods.
+### Strict Completeness & Dynamic Re-Weighting:
+* **Sufficiency Threshold:** A composite score is computed **only when at least 3 of the 4 indicators are valid**. If fewer than 3 indicators exist, the system returns `None` and displays `"Insufficient Data"`.
+* **Zero Missing-as-Zero Policy:** Missing parameters are never substituted with 0. The remaining valid indicator weights are dynamically re-allocated:
+  $$w_k' = \frac{w_k}{\sum_{j \in \mathcal{K}_{\text{obs}}} w_j}$$
 
 ---
 
-## 🤖 Step 4: Machine Learning & Environmental Prediction Module
+## 🤖 Machine Learning Climate Forecasting Architecture
 
-EcoVision features an explainable, time-series machine learning prediction engine built using **Scikit-learn** and historical atmospheric reanalysis from the **Open-Meteo Historical Archive (ERA5 / ERA5-Land)**.
+EcoVision features an explainable time-series machine learning model designed with Scikit-learn and historical reanalysis from the **Open-Meteo Historical Archive (ERA5 / ERA5-Land)**.
 
-### 1. Model Architecture & Input Features
-* **Model Type:** `sklearn.ensemble.RandomForestRegressor`
-  * `n_estimators = 100`, `max_depth = 6`, `random_state = 42`
-  * Explainable ensemble tree structure optimized for non-linear lag relationships.
-* **Target Variable:** Monthly average surface temperature (`temperature_mean`, °C).
-* **Engineered Feature Set (6 Lags):**
-  1. `month`: Calendar month (1–12) capturing solar declination and seasonal cycles.
-  2. `year`: Calendar year capturing long-term inter-annual warming trends.
-  3. `prev_month_temp`: Lag 1 ($T_{t-1}$) capturing immediate atmospheric thermal inertia.
-  4. `prev_2m_avg_temp`: Rolling 2-month average ($\frac{T_{t-1} + T_{t-2}}{2}$) reflecting seasonal transition momentum.
-  5. `prev_3m_avg_temp`: Rolling 3-month average ($\frac{T_{t-1} + T_{t-2} + T_{t-3}}{3}$) tracking quarterly persistence.
-  6. `prev_month_rain`: Lag 1 precipitation sum ($R_{t-1}$) capturing soil moisture and evaporative cooling feedback.
-
-### 2. Training & Testing Methodology
-* **Chronological Time-Series Split:**
-  * Strict temporal split: the model trains on earlier chronological months and tests on the final 12-month holdout window.
-  * **Zero data leakage:** No random shuffling is performed, preserving the natural forward arrow of time.
-* **Seasonal-Average Baseline Benchmark:**
-  * Every model is benchmarked against a seasonal meteorological baseline ($\bar{T}_m = \text{historical mean for month } m$).
-  * Calculates both Random Forest and Baseline **MAE** (Mean Absolute Error) and **RMSE** (Root Mean Squared Error).
-  * Validates whether machine learning outperforms naive seasonal repetition.
-
-### 3. Autoregressive Six-Month Forecast
-* **Recursive Lag Update:**
-  * Predicts month $t+1$ using observed lags.
-  * For months $t+2$ through $t+6$, dynamically feeds preceding predicted temperatures back into the lag features ($T_{t-1}, T_{t-2}, T_{t-3}$).
-  * Uses historical seasonal rainfall averages for future precipitation inputs.
-* **Outputs per Forecast Month:**
-  * Predicted Mean Temperature (°C)
-  * Historical Baseline Benchmark Temperature (°C)
-  * Delta from Baseline ($\pm$ °C)
-  * Trend Direction (*Warming*, *Cooling*, *Stable*)
-  * Empirical Confidence Interval Corridor derived from validated holdout MAE ($\pm \text{MAE}$).
-
-### 4. Dual-Layer Caching Architecture
-* **Layer 1 (Database):** Raw 5-year monthly historical records (e.g. 69 records) are persisted in SQLite table `city_monthly_history`. Once ingested, subsequent model fits for that municipality run entirely offline without re-hitting external APIs.
-* **Layer 2 (In-Memory):** Fitted model parameters, evaluation metrics, and 6-month projections are cached in memory keyed by geographical coordinates, serving repeat dashboard queries in **~2 ms**.
+* **Algorithm:** `sklearn.ensemble.RandomForestRegressor(n_estimators=100, max_depth=6, random_state=42)`
+* **Input Features:** Calendar `month` (1–12), `year`, 1-month lag temperature ($T_{t-1}$), rolling 2-month average temperature ($\frac{T_{t-1}+T_{t-2}}{2}$), rolling 3-month average temperature ($\frac{T_{t-1}+T_{t-2}+T_{t-3}}{3}$), and 1-month lag precipitation sum ($R_{t-1}$).
+* **Chronological Holdout Validation:** Strict temporal holdout (training on earlier months, testing on the final 12 chronological months). Zero random shuffling prevents temporal data leakage.
+* **Seasonal Baseline Benchmark:** Benchmark against a naive historical monthly mean ($\bar{T}_m$). The system reports both Random Forest and Baseline **MAE** and **RMSE** to verify that machine learning provides genuine predictive value over seasonal repetition.
+* **Autoregressive 6-Month Projection:** Computes step-by-step recursive forecasts ($t+1 \rightarrow t+6$), feeding predicted temperatures back into subsequent lag vectors with expanding confidence corridors:
+  $$\text{Corridor}_{t+h} = \hat{y}_{t+h} \pm z_{\alpha/2} \cdot \hat{\sigma} \sqrt{1 + \frac{h}{6}}$$
 
 ---
 
-## 🚀 Exact Instructions to Run the Application
+## 🔒 Security Hardening Controls
 
-### Option A: Quick Launch Scripts (Windows)
-1. Double-click `run_backend.bat` to start the Flask API on `http://127.0.0.1:5000`.
-2. Double-click `run_frontend.bat` to start the React Vite dev server on `http://localhost:5173`.
-3. Open `http://localhost:5173` in your browser.
+EcoVision is engineered to enterprise security standards:
 
-### Option B: Terminal Commands
-
-#### 1. Start the Flask Backend
-```powershell
-# From project root (d:\ECOMETER)
-.\backend\venv\Scripts\python.exe backend\run.py
-```
-* Backend starts on `http://127.0.0.1:5000`.
-* Check health: `http://127.0.0.1:5000/api/health`.
-
-#### 2. Start the React Frontend
-```powershell
-# In a separate terminal
-cd frontend
-npm run dev
-```
-* Open `http://localhost:5173` in any browser.
-* Search for any city worldwide (e.g. London, Tokyo, New York, Delhi, Paris, Berlin) to inspect live telemetry and verified SQLite persistence.
+1. **Sliding-Window Rate Limiter:** Zero external Redis/Memcached dependencies. In-memory thread-safe sliding windows per client IP protect endpoints against DDoS and CPU-exhaustion attacks.
+2. **IEEE 754 Coordinate Sanitization:** Rejects `NaN`, `+Infinity`, `-Infinity`, and non-numeric inputs. Latitude is clamped to $[-90.0, 90.0]$ and longitude to $[-180.0, 180.0]$.
+3. **CORS Origin Whitelisting:** Strict origin validation. In production, wildcard `CORS_ORIGINS=*` is rejected on startup.
+4. **Global Payload Capping:** `MAX_CONTENT_LENGTH = 1MB` prevents memory-exhaustion attacks.
+5. **Database Parameterization:** 100% of SQLite queries utilize parameterized `?` placeholders, eliminating SQL injection.
+6. **Exception Masking & Uniform JSON Envelopes:** Internal tracebacks and local file paths are masked behind uniform JSON error payloads (`{"error": "...", "status": 4xx/5xx}`).
+7. **Security Response Headers:** Emits `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection: 1; mode=block`, and `Referrer-Policy: strict-origin-when-cross-origin`.
 
 ---
 
-## 🔍 Verified API Endpoints
+## ❓ Troubleshooting Guide
 
-- `GET /api/health` — System status, SQLite diagnostics, registered APIs.
-- `GET /api/cities/search?q={query}` — Worldwide city search via Open-Meteo Geocoding.
-- `GET /api/environmental/data?lat={lat}&lon={lon}&name={city}` — Live weather & air quality ingestion and SQLite persistence.
-- `GET /api/environmental/analysis?lat={lat}&lon={lon}&days={7|14|30}&name={city}` — Step 3 Environmental scoring, historical trend analysis, insights, and recommendations.
-- `GET /api/environmental/prediction?lat={lat}&lon={lon}&name={city}` — Step 4 Scikit-learn Random Forest climate prediction, 6-month forecast, and baseline comparison.
-- `GET /api/cities/saved` — List of stored cities in SQLite with recent observations.
-- `GET /api/metrics/summary` — Default location environmental summary.
-- `GET /api/metrics/timeseries` — Default 24-hour environmental trend series.
+| Problem / Symptom | Root Cause | Resolution |
+|---|---|---|
+| `Port 5000 is already in use` | Another Flask, AirPlay, or Python process is bound to port 5000 | Terminate the occupying process or run `python run.py --port 5001` and update `vite.config.js`. |
+| `Failed to fetch prediction models (404)` | Outdated API route called or query parameters malformed | Ensure the frontend is calling `/api/environmental/prediction?lat=...&lon=...`. |
+| `PowerShell script execution disabled (PSSecurityException)` | Windows PowerShell default execution policy blocks `activate.ps1` | Run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` in your PowerShell window. |
+| `CORS Error: Origin not allowed` | Frontend port is not listed in `backend/.env` | Verify that `CORS_ORIGINS` in `backend/.env` contains your exact frontend URL (e.g. `http://localhost:5173`). |
+| `CPCB Data Unavailable Banner` | Target city is outside India or the physical monitoring station is temporarily offline | Normal behavior. The system gracefully falls back to Open-Meteo CAMS atmospheric reanalysis. |
 
 ---
 
-## 🔒 Security Hardening & Code Quality
+## 📜 Academic Attribution & License
 
-EcoVision includes robust, production-grade security controls designed to protect against injection, denial of service, resource exhaustion, and sensitive information leakage:
-
-### 1. Environment & Secrets Management
-- **Zero Hardcoded Secrets:** No API keys, passwords, or credentials are hardcoded in the codebase or stored in git history.
-- **Config Separation:** Distinct `DevelopmentConfig`, `ProductionConfig`, and `TestingConfig` classes in `backend/app/config.py`.
-- **Debug Disabled by Default:** `DEBUG = False` and `TESTING = False` by default. Startup validation immediately terminates the process if `FLASK_DEBUG=True` in production.
-- **Strict Host Binding:** Defaults to loopback `127.0.0.1` preventing unintended external interface exposure.
-
-### 2. Cross-Origin Resource Sharing (CORS) Security
-- **Strict Origin Whitelist:** In development, only approved local frontend ports (`http://localhost:5173`, `http://127.0.0.1:5173`, etc.) are permitted.
-- **Wildcard Rejection in Production:** Setting `CORS_ORIGINS=*` or leaving origins empty in production raises a fatal configuration exception on startup.
-
-### 3. API Endpoint Hardening & Input Validation
-- **Coordinate Sanitization:** All incoming latitude and longitude parameters are strictly validated via `backend/app/services/validators.py`:
-  - Enforces finite float types (strictly rejects `NaN`, `+Infinity`, `-Infinity`, and non-numeric inputs).
-  - Validates geographical ranges: $-90.0 \le \text{lat} \le 90.0$ and $-180.0 \le \text{lon} \le 180.0$.
-- **City Search Query Bounding:** City search queries are stripped of control characters, bounded between 2 and 100 characters, and sanitized against script tags.
-- **Payload Bounding:** Global request payload cap enforced via `MAX_CONTENT_LENGTH = 1MB` to prevent memory-exhaustion DoS attacks.
-- **Analysis Parameter Validation:** The `days` parameter is strictly checked against allowed values `(7, 14, 30)` and database queries clamp `limit` to safe maximums ($1 \le \text{limit} \le 100$).
-
-### 4. Zero-Dependency Rate Limiting
-- **Sliding-Window Rate Limiter:** Implemented in `backend/app/services/rate_limiter.py` using thread-safe in-memory sliding windows per client IP.
-- **HTTP 429 & Retry-After:** Returns standard HTTP 429 status with user-friendly retry guidance and `Retry-After` response headers.
-- **CPU Exhaustion Defense:** ML retraining endpoint is protected by a 30-second cooldown timer (`RETRAIN_COOLDOWN_SECONDS`) preventing malicious CPU exhaustion from rapid retrain spam.
-
-### 5. Database Hardening (SQLite)
-- **100% Parameterized Queries:** Every database interaction strictly utilizes parameterized queries (`?` placeholders). SQL injection strings cannot alter query logic or execute stacked statements.
-- **Pragmas & Integrity:** Enforces `PRAGMA foreign_keys = ON;` and WAL (`Write-Ahead Logging`) mode with a 10.0-second busy timeout to prevent database locks.
-- **Error Masking:** Database exceptions are caught, logged internally, rolled back, and masked from user responses.
-
-### 6. Centralized Logging & Error Sanitization
-- **Standardized Python Logging:** Standard library `logging` replaces scattered `print()` calls with formatted timestamps, log levels, and module names.
-- **Uniform JSON Error Envelopes:** Global error handlers (400, 404, 405, 413, 429, 500) ensure internal stack traces, local system paths, and raw database errors are never exposed in HTTP responses.
-- **Security Response Headers:** Every HTTP response includes:
-  - `X-Content-Type-Options: nosniff`
-  - `X-Frame-Options: DENY`
-  - `X-XSS-Protection: 1; mode=block`
-  - `Referrer-Policy: strict-origin-when-cross-origin`
-  - `Cache-Control: no-store, max-age=0` (for dynamic JSON endpoints)
-
-### 7. Dependency & Security Audits
-Both backend and frontend dependencies are audited against known vulnerability databases:
-```powershell
-# Python backend vulnerability audit
-.\backend\venv\Scripts\python.exe -m pip_audit
-
-# Node.js frontend vulnerability audit
-npm --prefix frontend audit
-```
-* **Backend Status:** 0 known vulnerabilities (`pip-audit` verified).
-* **Frontend Status:** 0 known vulnerabilities (`npm audit` verified).
-
-### 8. Automated Security Test Suite
-The backend includes a dedicated security test suite covering validation, rate limiting, SQL injection defense, and error sanitization:
-```powershell
-.\backend\venv\Scripts\python.exe -m unittest discover -s backend/tests -p "test_*.py"
-```
-* **Coverage:** 26 automated unit and security tests executing in $< 0.5$ seconds.
+* **Project:** EcoVision — City Environmental Monitoring, Analysis and Prediction System
+* **Academic Session:** 2025–2026
+* **License:** Educational & Academic Open-Source License
+* **External Telemetry Credits:**
+  * [Central Pollution Control Board (CPCB), Ministry of Environment, Forest and Climate Change, Govt. of India](https://cpcb.nic.in/)
+  * [Open-Meteo Weather API](https://open-meteo.com/) (Open-source weather data via Copernicus ECMWF ERA5)
+  * [Copernicus Atmosphere Monitoring Service (CAMS)](https://atmosphere.copernicus.eu/)
