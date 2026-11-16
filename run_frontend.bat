@@ -1,16 +1,16 @@
 @echo off
-setlocal enabledelayedexpansion
+setlocal
 
 echo ======================================================================
-echo                ECOVISION FRONTEND INITIALIZATION & LAUNCH
+echo                ECOVISION FRONTEND INITIALIZATION AND LAUNCH
 echo ======================================================================
 cd /d "%~dp0\frontend"
 
 :: 1. Check if Node.js / npm is installed
 where npm >nul 2>nul
 if errorlevel 1 (
-    echo [ERROR] Node.js / npm was not found on your system PATH!
-    echo Please install Node.js (v18 or v20 LTS) from https://nodejs.org/
+    echo [ERROR] Node.js or npm was not found on your system PATH.
+    echo Please install Node.js v18 or v20 LTS from https://nodejs.org/
     pause
     exit /b 1
 )
@@ -18,10 +18,10 @@ if errorlevel 1 (
 :: 2. Check if node_modules exists
 if not exist "node_modules" (
     echo [INFO] Frontend dependencies not found.
-    echo [INFO] Running 'npm install' automatically...
+    echo [INFO] Running npm install automatically...
     call npm install
     if errorlevel 1 (
-        echo [ERROR] 'npm install' failed. Please check your network connection.
+        echo [ERROR] npm install failed. Please check your network connection.
         pause
         exit /b 1
     )

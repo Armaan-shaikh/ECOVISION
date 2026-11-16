@@ -1,8 +1,8 @@
 @echo off
-setlocal enabledelayedexpansion
+setlocal
 
 echo ======================================================================
-echo                ECOVISION BACKEND INITIALIZATION & LAUNCH
+echo                ECOVISION BACKEND INITIALIZATION AND LAUNCH
 echo ======================================================================
 cd /d "%~dp0"
 
@@ -11,26 +11,24 @@ if not exist "backend\venv\Scripts\python.exe" (
     echo [INFO] Python virtual environment not found in backend\venv.
     echo [INFO] Setting up virtual environment automatically...
 
-    :: Detect available Python interpreter
-    set PYTHON_CMD=
-    where python >nul 2>nul && set PYTHON_CMD=python
+    set "PYTHON_CMD="
+    where python >nul 2>nul && set "PYTHON_CMD=python"
     if not defined PYTHON_CMD (
-        where py >nul 2>nul && set PYTHON_CMD=py
+        where py >nul 2>nul && set "PYTHON_CMD=py"
     )
 
     if not defined PYTHON_CMD (
-        echo [ERROR] Python 3.10+ was not found on your system PATH!
-        echo Please install Python from https://www.python.org/downloads/
-        echo (Ensure you check "Add Python to PATH" during installation).
+        echo [ERROR] Python 3.10+ was not found on your system PATH.
+        echo Please install Python 3.10, 3.11, or 3.12 from https://www.python.org/
+        echo Make sure to check the box: Add python.exe to PATH during installation.
         pause
         exit /b 1
     )
 
-    echo [INFO] Using system Python: !PYTHON_CMD!
-    echo [INFO] Creating virtual environment in backend\venv...
-    !PYTHON_CMD! -m venv backend\venv
+    echo [INFO] Using system Python to create backend\venv...
+    %PYTHON_CMD% -m venv backend\venv
     if errorlevel 1 (
-        echo [ERROR] Failed to create virtual environment.
+        echo [ERROR] Failed to create virtual environment in backend\venv.
         pause
         exit /b 1
     )

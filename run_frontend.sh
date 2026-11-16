@@ -26,3 +26,4 @@ echo "Launching React 19 + Vite Frontend on http://localhost:5173 ..."
 echo "Proxying API calls to Flask Backend on http://127.0.0.1:5001 ..."
 echo "======================================================================"
 exec npm run dev
+

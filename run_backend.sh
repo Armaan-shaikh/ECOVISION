@@ -37,3 +37,4 @@ echo "Launching EcoVision Flask REST API on http://127.0.0.1:5001 ..."
 echo "Press Ctrl+C in this terminal to stop the server."
 echo "======================================================================"
 exec backend/venv/bin/python backend/run.py
+
