@@ -125,7 +125,7 @@ Create a local `.env` configuration file from the provided `.env.example`:
   cp .env.example .env
   ```
 
-*(The default `.env` settings are pre-configured for local development and bind safely to `127.0.0.1:5000` with CORS enabled for `http://localhost:5173`).*
+*(The default `.env` settings are pre-configured for local development and bind safely to `127.0.0.1:5001` with CORS enabled for `http://localhost:5173`).*
 
 #### 2.6 Start the Flask Backend Server
 ```bash
@@ -139,11 +139,11 @@ python run.py
   ======================================================================
   * Environment: development
   * Server Host: 127.0.0.1
-  * Server Port: 5000
+  * Server Port: 5001
   * Database:    ecovision.db (WAL Mode Enabled)
   ======================================================================
   ```
-* **Health Check:** Open your browser or run `curl http://127.0.0.1:5000/api/health` to confirm the backend and SQLite database are active.
+* **Health Check:** Open your browser or run `curl http://127.0.0.1:5001/api/health` to confirm the backend and SQLite database are active.
 
 ---
 
@@ -265,7 +265,7 @@ ECOVISION/
 │   │   ├── test_functional_regression.py            # Functional API regression tests (13)
 │   │   └── test_security_and_hardening.py           # Security, rate limit & float tests (16)
 │   ├── requirements.txt                             # Audited Python dependency manifest
-│   ├── run.py                                       # WSGI server entrypoint (http://127.0.0.1:5000)
+│   ├── run.py                                       # WSGI server entrypoint (http://127.0.0.1:5001)
 │   ├── ecovision.db                                 # Embedded SQLite production/dev database
 │   └── .env.example                                 # Environment configuration template
 │
@@ -299,7 +299,9 @@ ECOVISION/
 ├── .gitignore                                       # Exclusion rules for Python, Node, caches, and secrets
 ├── README.md                                        # Master project manual & getting started guide
 ├── run_backend.bat                                  # Windows one-click batch launcher for Flask API
-└── run_frontend.bat                                 # Windows one-click batch launcher for React Vite
+├── run_backend.sh                                   # Linux / macOS shell launcher for Flask API
+├── run_frontend.bat                                 # Windows one-click batch launcher for React Vite
+└── run_frontend.sh                                  # Linux / macOS shell launcher for React Vite
 ```
 
 ---
@@ -386,7 +388,8 @@ EcoVision is engineered to enterprise security standards:
 
 | Problem / Symptom | Root Cause | Resolution |
 |---|---|---|
-| `Port 5000 is already in use` | Another Flask, AirPlay, or Python process is bound to port 5000 | Terminate the occupying process or run `python run.py --port 5001` and update `vite.config.js`. |
+| `Error: socket hang up` or `502 Bad Gateway` in terminal | Flask backend is not running, or another background process/service occupied port 5000 | EcoVision now runs on port **5001** by default to prevent port conflicts (such as macOS AirPlay or Windows background services). Start the backend by running `run_backend.bat` (Windows), `bash run_backend.sh` (Linux/macOS), or `python backend/run.py`. |
+| `Flask API: Connecting...` / `Diagnostics: Offline` | Frontend cannot reach backend API | Verify the Flask server is running in a terminal on `http://127.0.0.1:5001`. Check `http://127.0.0.1:5001/api/health` directly in your browser. |
 | `Failed to fetch prediction models (404)` | Outdated API route called or query parameters malformed | Ensure the frontend is calling `/api/environmental/prediction?lat=...&lon=...`. |
 | `PowerShell script execution disabled (PSSecurityException)` | Windows PowerShell default execution policy blocks `activate.ps1` | Run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` in your PowerShell window. |
 | `CORS Error: Origin not allowed` | Frontend port is not listed in `backend/.env` | Verify that `CORS_ORIGINS` in `backend/.env` contains your exact frontend URL (e.g. `http://localhost:5173`). |

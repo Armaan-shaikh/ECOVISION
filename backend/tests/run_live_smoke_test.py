@@ -20,11 +20,11 @@ from app.config import DevelopmentConfig
 
 def start_server():
     app = create_app(DevelopmentConfig)
-    # Run without debug or reloader
-    app.run(host="127.0.0.1", port=5000, debug=False, use_reloader=False)
+    # Run on port 5001 without debug or reloader
+    app.run(host="127.0.0.1", port=5001, debug=False, use_reloader=False)
 
 def run_tests():
-    base_url = "http://127.0.0.1:5000"
+    base_url = "http://127.0.0.1:5001"
     results = {}
 
     # Wait for server to come online

@@ -19,6 +19,10 @@ load_dotenv(BASE_DIR / ".env")
 DEFAULT_DEV_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+    "http://localhost:5175",
+    "http://127.0.0.1:5175",
     "http://localhost:3000",
     "http://127.0.0.1:3000"
 ]
@@ -53,7 +57,7 @@ class Config:
     TESTING = False
     
     # Server Binding
-    PORT = int(os.getenv("PORT", 5000))
+    PORT = int(os.getenv("PORT", 5001))
     HOST = os.getenv("HOST", "127.0.0.1")
     
     # Session / Token Secret Key

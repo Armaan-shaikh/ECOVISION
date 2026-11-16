@@ -2269,7 +2269,7 @@ python run.py
 ```text
 [2026-11-10 14:00:00] [INFO] [app:45] EcoVision backend initialized in development mode.
 [2026-11-10 14:00:00] [INFO] [db_service:28] SQLite database verified at ecovision.db (WAL mode active).
-[2026-11-10 14:00:00] [INFO] [werkzeug:120] Running on http://127.0.0.1:5000 (Press CTRL+C to quit)
+[2026-11-10 14:00:00] [INFO] [werkzeug:120] Running on http://127.0.0.1:5001 (Press CTRL+C to quit)
 ```
 
 #### Step 2: Launch the Frontend Vite Development Server
@@ -2304,8 +2304,8 @@ The dashboard will load with the default municipal context (Bengaluru), initiati
 | Port 5000 Already in Use | Stale background Python task | Windows: `Stop-Process -Name python -Force`       |
 | (Address already in use) | or macOS AirPlay receiver.   | Linux: `fuser -k 5000/tcp`                        |
 +--------------------------+------------------------------+---------------------------------------------------+
-| Vite Network Error       | Backend server is offline or | Verify backend is active on port 5000.            |
-| (Failed to fetch 404/500)| running on alternate port.   | Confirm `VITE_API_BASE_URL` points to port 5000.  |
+| Vite Network Error       | Backend server is offline or | Verify backend is active on port 5001.            |
+| (Failed to fetch 404/500)| running on alternate port.   | Confirm `VITE_API_BASE_URL` points to port 5001.  |
 +--------------------------+------------------------------+---------------------------------------------------+
 | CPCB Feed Offline / Slow | Upstream MoEFCC CAAQMS RSS   | No action needed; EcoVision automatically falls   |
 | (Station Timeout)        | server experiencing latency. | back to CAMS atmospheric models with UI badge.    |
@@ -2508,12 +2508,12 @@ pause
 - **Architectural Role:** Template environment manifest defining required and optional configuration keys without exposing operational secrets.
 - **Exports:** Declarative environment key-value template.
 - **Imports:** N/A.
-- **Internal Architecture:** Key-value pairs organized into Server Configuration (`PORT=5000`, `FLASK_ENV=development`), Database Configuration (`DATABASE_PATH=ecovision.db`), Security Settings (`CORS_ALLOWED_ORIGINS=http://localhost:5173`), and Telemetry Timeouts (`TIMEOUT_SECONDS=10`).
+- **Internal Architecture:** Key-value pairs organized into Server Configuration (`PORT=5001`, `FLASK_ENV=development`), Database Configuration (`DATABASE_PATH=ecovision.db`), Security Settings (`CORS_ALLOWED_ORIGINS=http://localhost:5173`), and Telemetry Timeouts (`TIMEOUT_SECONDS=10`).
 - **Verbatim Specification:**
 ```ini
 # Flask Server Environment
 FLASK_ENV=development
-PORT=5000
+PORT=5001
 SECRET_KEY=ecovision-development-secret-key-change-in-prod
 
 # Database Persistence File Path
@@ -4088,7 +4088,7 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://localhost:5001',
         changeOrigin: true,
         secure: false,
       }
@@ -4596,7 +4596,7 @@ $$R^2 = 1 - \frac{\sum_{i=1}^{M} (y_i - \hat{y}_i)^2}{\sum_{i=1}^{M} (y_i - \bar
 +--------------------------+---------------+-----------------------+------------------------------------------+
 | `TIMEOUT_CPCB`           | float (sec)   | `10.0`                | Outbound timeout for CPCB CAAQMS RSS.    |
 +--------------------------+---------------+-----------------------+------------------------------------------+
-| `VITE_API_BASE_URL`      | string (URL)  | `http://localhost:5000| Frontend client API destination gateway. |
+| `VITE_API_BASE_URL`      | string (URL)  | `http://localhost:5001| Frontend client API destination gateway. |
 +--------------------------+---------------+-----------------------+------------------------------------------+
 ```
 

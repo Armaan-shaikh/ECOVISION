@@ -6,13 +6,31 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 /**
+ * Extract human-readable error messages with friendly guidance for offline backends.
+ */
+async function extractErrorMessage(response, defaultMsg) {
+  try {
+    const errorData = await response.json();
+    if (errorData && errorData.message) {
+      return errorData.message;
+    }
+  } catch {
+    // Non-JSON response
+  }
+  if (response.status === 502 || response.status === 504) {
+    return 'Flask backend is offline or unreachable on port 5001. Please run "run_backend.bat" or "python backend/run.py".';
+  }
+  return `${defaultMsg} (${response.status})`;
+}
+
+/**
  * Check backend and database health
  */
 export async function fetchHealth() {
   const response = await fetch(`${API_BASE_URL}/health`);
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `Health check failed (${response.status})`);
+    const msg = await extractErrorMessage(response, 'Health check failed');
+    throw new Error(msg);
   }
   return await response.json();
 }
@@ -25,8 +43,8 @@ export async function searchCities(query) {
   const encoded = encodeURIComponent(query.trim());
   const response = await fetch(`${API_BASE_URL}/cities/search?q=${encoded}`);
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `City search failed (${response.status})`);
+    const msg = await extractErrorMessage(response, 'City search failed');
+    throw new Error(msg);
   }
   const data = await response.json();
   return data.results || [];
@@ -48,8 +66,8 @@ export async function fetchCityEnvironmentalData(city) {
 
   const response = await fetch(`${API_BASE_URL}/environmental/data?${params.toString()}`);
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `Failed to fetch environmental data (${response.status})`);
+    const msg = await extractErrorMessage(response, 'Failed to fetch environmental data');
+    throw new Error(msg);
   }
   return await response.json();
 }
@@ -71,8 +89,8 @@ export async function fetchEnvironmentalAnalysis(city, days = 7) {
 
   const response = await fetch(`${API_BASE_URL}/environmental/analysis?${params.toString()}`);
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `Failed to fetch environmental analysis (${response.status})`);
+    const msg = await extractErrorMessage(response, 'Failed to fetch environmental analysis');
+    throw new Error(msg);
   }
   return await response.json();
 }
@@ -100,7 +118,8 @@ export async function fetchCityPrediction(city, forceRetrain = false) {
     if (errorData && (errorData.status === 'unavailable' || errorData.message)) {
       return errorData;
     }
-    throw new Error(errorData.message || `Failed to fetch prediction models (${response.status})`);
+    const msg = await extractErrorMessage(response, 'Failed to fetch prediction models');
+    throw new Error(msg);
   }
   return await response.json();
 }
@@ -111,8 +130,8 @@ export async function fetchCityPrediction(city, forceRetrain = false) {
 export async function fetchSavedCities() {
   const response = await fetch(`${API_BASE_URL}/cities/saved`);
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `Failed to load saved cities (${response.status})`);
+    const msg = await extractErrorMessage(response, 'Failed to load saved cities');
+    throw new Error(msg);
   }
   const data = await response.json();
   return data.cities || [];
