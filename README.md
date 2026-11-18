@@ -394,6 +394,7 @@ EcoVision is engineered to enterprise security standards:
 | `PowerShell script execution disabled (PSSecurityException)` | Windows PowerShell default execution policy blocks `activate.ps1` | Run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` in your PowerShell window. |
 | `CORS Error: Origin not allowed` | Frontend port is not listed in `backend/.env` | Verify that `CORS_ORIGINS` in `backend/.env` contains your exact frontend URL (e.g. `http://localhost:5173`). |
 | `CPCB Data Unavailable Banner` | Target city is outside India or the physical monitoring station is temporarily offline | Normal behavior. The system gracefully falls back to Open-Meteo CAMS atmospheric reanalysis. |
+| `ImportError: DLL load failed ... An Application Control policy has blocked this file` | Windows 11 Smart App Control (SAC) or enterprise policy blocks pip-compiled C-extension DLLs | Go to Windows Settings > Privacy & security > Windows Security > App & browser control > Smart App Control settings, and toggle it to **Off**. |
 
 ---
 
