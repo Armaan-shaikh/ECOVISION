@@ -2,15 +2,14 @@ import React, { useState } from 'react';
 import { Shield, Radio, Activity, Info, CheckCircle2, AlertTriangle, Layers } from 'lucide-react';
 
 export default function PollutantBreakdown({ current }) {
+  const isGroundAvailable = current?.ground_monitoring?.status === 'success';
+  const [activeView, setActiveView] = useState(isGroundAvailable ? 'ground' : 'cams');
+
   if (!current) return null;
 
   const groundMonitoring = current.ground_monitoring;
-  const isGroundAvailable = groundMonitoring?.status === 'success';
   const groundPollutants = isGroundAvailable ? groundMonitoring.pollutant_sub_indices : {};
   const groundStation = isGroundAvailable ? groundMonitoring.station : null;
-
-  // Active view tab if ground data exists: "ground" or "cams"
-  const [activeView, setActiveView] = useState(isGroundAvailable ? 'ground' : 'cams');
 
   // Copernicus CAMS Trace Gas Model data
   const camsTraceGases = [

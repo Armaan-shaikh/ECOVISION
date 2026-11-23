@@ -2,8 +2,8 @@
 
 @layer base {
   body {
-    background-color: #07130e;
-    color: #e5f0ea;
+    background-color: #f8fafc;
+    color: #0f172a;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
@@ -11,42 +11,253 @@
   }
 }
 
-/* Subtle, refined scrollbars */
+/* Crisp academic scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #08150f;
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #153324;
+  background: #cbd5e1;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #10b981;
+  background: #94a3b8;
 }
 
-/* Polished environmental glassmorphism cards - understated and elegant */
+/* ==========================================================================
+   ACADEMIC DESIGN SYSTEM: WHITE CONTENT PANELS & SUBTLE BORDERS
+   Transforms dashboard panels into crisp, formal academic containers
+   ========================================================================== */
+
 .eco-card {
-  background: rgba(11, 28, 20, 0.65);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(16, 185, 129, 0.14);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background-color: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04) !important;
+  color: #0f172a;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .eco-card:hover {
-  border-color: rgba(16, 185, 129, 0.28);
-  box-shadow: 0 6px 24px -2px rgba(0, 0, 0, 0.5);
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05) !important;
 }
 
-/* Subtly elevated surface for dropdowns and interactive popovers */
+/* Elevated academic popover for city search dropdown */
 .eco-popover {
-  background: rgba(8, 22, 16, 0.94);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(16, 185, 129, 0.22);
-  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.65);
+  background-color: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  color: #0f172a !important;
+}
+
+/* ==========================================================================
+   ACADEMIC TYPOGRAPHY & CONTRAST INJECTIONS FOR EXISTING DASHBOARD
+   Preserves component functionality while rendering in pure academic style
+   ========================================================================== */
+
+/* High-contrast headings and values inside cards */
+.eco-card .text-white {
+  color: #0f172a !important;
+}
+
+/* Secondary labels and descriptive text */
+.eco-card .text-emerald-50,
+.eco-card .text-emerald-100,
+.eco-card .text-emerald-200,
+.eco-card .text-emerald-200\/80,
+.eco-card .text-emerald-200\/90 {
+  color: #334155 !important;
+}
+
+.eco-card .text-emerald-300 {
+  color: #064e3b !important; /* dark academic green */
+}
+
+.eco-card .text-emerald-400 {
+  color: #065f46 !important;
+}
+
+.eco-card .text-emerald-400\/50,
+.eco-card .text-emerald-400\/60,
+.eco-card .text-emerald-400\/70,
+.eco-card .text-emerald-400\/80 {
+  color: #475569 !important;
+}
+
+/* Inner sub-containers (replace dark boxes with crisp off-white panels) */
+.eco-card [class*="bg-[#0"] {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+.eco-card [class*="bg-[#0"]:hover {
+  background-color: #f1f5f9 !important;
+}
+
+/* Academic Status & Clinical Badges */
+.eco-card [class*="bg-emerald-950"] {
+  background-color: #ecfdf5 !important;
+  color: #065f46 !important;
+  border-color: #a7f3d0 !important;
+}
+
+.eco-card [class*="bg-amber-950"] {
+  background-color: #fffbeb !important;
+  color: #92400e !important;
+  border-color: #fde68a !important;
+}
+
+.eco-card [class*="bg-orange-950"] {
+  background-color: #fff7ed !important;
+  color: #9a3412 !important;
+  border-color: #fed7aa !important;
+}
+
+.eco-card [class*="bg-rose-950"] {
+  background-color: #fff1f2 !important;
+  color: #9f1239 !important;
+  border-color: #fecdd3 !important;
+}
+
+.eco-card [class*="bg-teal-950"] {
+  background-color: #f0fdfa !important;
+  color: #115e59 !important;
+  border-color: #99f6e4 !important;
+}
+
+.eco-card [class*="bg-purple-950"] {
+  background-color: #faf5ff !important;
+  color: #6b21a8 !important;
+  border-color: #e9d5ff !important;
+}
+
+.eco-card [class*="bg-gray-950"] {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Academic Divider Borders */
+.eco-card [class*="border-emerald-950"],
+.eco-card [class*="border-emerald-900"],
+.eco-card [class*="border-emerald-800"],
+.eco-card [class*="border-emerald-700"],
+.eco-card [class*="border-emerald-600/30"],
+.eco-card [class*="border-emerald-500/15"],
+.eco-card [class*="border-emerald-500/20"],
+.eco-card [class*="border-emerald-500/30"],
+.eco-card [class*="border-emerald-500/40"] {
+  border-color: #e2e8f0 !important;
+}
+
+/* Input Fields inside City Search */
+.eco-card input[type="text"] {
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  border-radius: 0.375rem !important;
+}
+
+.eco-card input[type="text"]::placeholder {
+  color: #94a3b8 !important;
+}
+
+.eco-card input[type="text"]:focus {
+  border-color: #064e3b !important;
+  outline: 2px solid rgba(6, 78, 59, 0.15) !important;
+}
+
+/* Quick preset pills */
+.eco-card .bg-emerald-900\/50 {
+  background-color: #064e3b !important;
+  border-color: #064e3b !important;
+  color: #ffffff !important;
+}
+
+.eco-card .bg-\[\#081810\]\/70 {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #334155 !important;
+}
+
+.eco-card .bg-\[\#081810\]\/70:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* Dropdown Results popover overrides */
+.eco-popover .bg-\[\#06170f\]\/95 {
+  background-color: #f8fafc !important;
+  color: #334155 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.eco-popover button {
+  color: #1e293b !important;
+}
+
+.eco-popover button:hover {
+  background-color: #f1f5f9 !important;
+}
+
+.eco-popover .text-white {
+  color: #0f172a !important;
+}
+
+.eco-popover .text-emerald-400\/60,
+.eco-popover .text-emerald-400\/50,
+.eco-popover .text-emerald-400\/70 {
+  color: #64748b !important;
+}
+
+.eco-popover .divide-emerald-950\/80,
+.eco-popover .divide-emerald-950\/50 {
+  border-color: #e2e8f0 !important;
+}
+
+/* Recharts Academic Clean Styling */
+.recharts-cartesian-grid line {
+  stroke: #e2e8f0 !important;
+}
+
+.recharts-text {
+  fill: #64748b !important;
+  font-size: 11px !important;
+}
+
+.recharts-legend-item-text {
+  color: #334155 !important;
+}
+
+/* Tooltip: Crisp Dark Navy for chart hovering readability */
+.recharts-tooltip-wrapper .bg-\[\#091b13\]\/95 {
+  background-color: #0f172a !important;
+  border: 1px solid #334155 !important;
+  border-radius: 0.375rem !important;
+  color: #f8fafc !important;
+}
+
+.recharts-tooltip-wrapper .bg-\[\#091b13\]\/95 .text-white {
+  color: #ffffff !important;
+}
+
+.recharts-tooltip-wrapper .bg-\[\#091b13\]\/95 .text-emerald-300,
+.recharts-tooltip-wrapper .bg-\[\#091b13\]\/95 .text-emerald-400,
+.recharts-tooltip-wrapper .bg-\[\#091b13\]\/95 .text-emerald-400\/80 {
+  color: #34d399 !important;
+}
+
+/* Subdue excessive animations for formal academic interface */
+.animate-ping {
+  animation: none !important;
 }

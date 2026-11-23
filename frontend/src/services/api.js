@@ -136,3 +136,34 @@ export async function fetchSavedCities() {
   const data = await response.json();
   return data.cities || [];
 }
+
+/**
+ * Retrieve stored historical observations from SQLite database for a city or all cities
+ */
+export async function fetchCityObservations(city = null, limit = 100) {
+  const params = new URLSearchParams({
+    limit: limit.toString(),
+  });
+  if (city && !city.all) {
+    if (city.record_id) {
+      params.set('record_id', city.record_id.toString());
+    }
+    if (city.id) {
+      params.set('city_id', city.id.toString());
+    }
+    if (city.latitude !== undefined && city.latitude !== null) {
+      params.set('lat', city.latitude.toString());
+    }
+    if (city.longitude !== undefined && city.longitude !== null) {
+      params.set('lon', city.longitude.toString());
+    }
+  }
+
+  const response = await fetch(`${API_BASE_URL}/environmental/observations?${params.toString()}`);
+  if (!response.ok) {
+    const msg = await extractErrorMessage(response, 'Failed to load SQLite observations');
+    throw new Error(msg);
+  }
+  const data = await response.json();
+  return data.observations || [];
+}

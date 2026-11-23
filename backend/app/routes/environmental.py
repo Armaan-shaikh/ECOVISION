@@ -26,7 +26,13 @@ from ..services.validators import (
     ValidationError
 )
 from ..services.rate_limiter import rate_limit
-from ..database import get_or_create_city, save_observation, get_saved_cities, get_latest_observation
+from ..database import (
+    get_or_create_city,
+    save_observation,
+    get_saved_cities,
+    get_latest_observation,
+    get_city_observations
+)
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +83,61 @@ def get_saved_cities_endpoint():
     except Exception as e:
         logger.error("Error retrieving saved cities: %s", e)
         return jsonify({"status": "error", "message": "Failed to retrieve stored municipality records.", "cities": []}), 500
+
+@environmental_bp.route("/environmental/observations", methods=["GET"])
+@rate_limit(max_requests=60, window_seconds=60.0)
+def get_city_observations_endpoint():
+    """
+    Retrieve stored environmental observation snapshots for a city or all cities from SQLite database.
+    Supports queries by record_id, city_id, or coordinates (lat, lon).
+    """
+    raw_record_id = request.args.get("record_id")
+    raw_city_id = request.args.get("city_id")
+    raw_lat = request.args.get("lat") or request.args.get("latitude")
+    raw_lon = request.args.get("lon") or request.args.get("longitude")
+    limit = validate_limit_param(request.args.get("limit"), min_val=1, max_val=200, default=50)
+
+    record_id = None
+    if raw_record_id:
+        try:
+            record_id = int(raw_record_id)
+        except (ValueError, TypeError):
+            record_id = None
+
+    city_id = None
+    if raw_city_id:
+        try:
+            city_id = int(raw_city_id)
+        except (ValueError, TypeError):
+            city_id = None
+    elif request.args.get("id") and not record_id:
+        try:
+            city_id = int(request.args.get("id"))
+        except (ValueError, TypeError):
+            city_id = None
+
+    lat = None
+    lon = None
+    if raw_lat and raw_lon:
+        try:
+            lat, lon = validate_coordinates(raw_lat, raw_lon)
+        except ValidationError:
+            pass
+
+    try:
+        observations = get_city_observations(city_id=city_id, latitude=lat, longitude=lon, limit=limit, record_id=record_id)
+        return jsonify({
+            "status": "success",
+            "count": len(observations),
+            "observations": observations
+        }), 200
+    except Exception as e:
+        logger.error("Error retrieving observations from SQLite: %s", e)
+        return jsonify({
+            "status": "error",
+            "message": "Failed to retrieve stored observation records.",
+            "observations": []
+        }), 500
 
 @environmental_bp.route("/environmental/data", methods=["GET", "POST"])
 @environmental_bp.route("/environmental/city", methods=["GET", "POST"])
@@ -333,6 +394,13 @@ def get_environmental_analysis_endpoint():
             "persistence_note": "Real-time telemetry snapshots are stored in SQLite; multi-day historical trends are computed on demand."
         }
 
+        # 8. Query stored SQLite observations for this city
+        try:
+            sqlite_obs = get_city_observations(latitude=lat, longitude=lon, limit=50)
+        except Exception as db_err:
+            logger.warning("Could not query SQLite observations for (%s, %s): %s", lat, lon, db_err)
+            sqlite_obs = []
+
         return jsonify({
             "status": "success",
             "city": {
@@ -359,7 +427,8 @@ def get_environmental_analysis_endpoint():
             "historical_trends": historical_analysis,
             "insights": insights,
             "recommendations": recommendations,
-            "coverage": coverage_info
+            "coverage": coverage_info,
+            "sqlite_records": sqlite_obs
         }), 200
 
     except Exception as e:

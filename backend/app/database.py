@@ -218,6 +218,74 @@ def get_latest_observation(city_id: int) -> dict | None:
     row = cursor.fetchone()
     return dict(row) if row else None
 
+def get_city_observations(city_id: int = None, latitude: float = None, longitude: float = None, limit: int = 50, record_id: int = None) -> list[dict]:
+    """
+    Retrieve chronologically stored real observation records for a city or all cities from SQLite.
+    Supports lookups by record_id, city_id, coordinate proximity, or all stored records when no filter is provided.
+    Includes associated city metadata (name, state, country, coordinates).
+    """
+    db = get_db()
+    cursor = db.cursor()
+    try:
+        safe_limit = max(1, min(int(limit), 200))
+    except (ValueError, TypeError):
+        safe_limit = 50
+
+    if record_id:
+        cursor.execute("""
+            SELECT o.id, o.city_id, c.name AS city_name, c.state AS city_state, c.country AS city_country,
+                   c.latitude AS city_latitude, c.longitude AS city_longitude,
+                   o.observation_time, o.temperature, o.relative_humidity,
+                   o.precipitation, o.rain, o.wind_speed, o.aqi, o.aqi_scale, o.european_aqi,
+                   o.pm25, o.pm10, o.no2, o.so2, o.co, o.ozone, o.data_source, o.recorded_at
+            FROM environmental_observations o
+            LEFT JOIN cities c ON o.city_id = c.id
+            WHERE o.id = ?
+            LIMIT 1
+        """, (record_id,))
+        return [dict(r) for r in cursor.fetchall()]
+    elif city_id:
+        cursor.execute("""
+            SELECT o.id, o.city_id, c.name AS city_name, c.state AS city_state, c.country AS city_country,
+                   c.latitude AS city_latitude, c.longitude AS city_longitude,
+                   o.observation_time, o.temperature, o.relative_humidity,
+                   o.precipitation, o.rain, o.wind_speed, o.aqi, o.aqi_scale, o.european_aqi,
+                   o.pm25, o.pm10, o.no2, o.so2, o.co, o.ozone, o.data_source, o.recorded_at
+            FROM environmental_observations o
+            LEFT JOIN cities c ON o.city_id = c.id
+            WHERE o.city_id = ?
+            ORDER BY o.observation_time DESC
+            LIMIT ?
+        """, (city_id, safe_limit))
+        return [dict(r) for r in cursor.fetchall()]
+    elif latitude is not None and longitude is not None:
+        cursor.execute("""
+            SELECT o.id, o.city_id, c.name AS city_name, c.state AS city_state, c.country AS city_country,
+                   c.latitude AS city_latitude, c.longitude AS city_longitude,
+                   o.observation_time, o.temperature, o.relative_humidity,
+                   o.precipitation, o.rain, o.wind_speed, o.aqi, o.aqi_scale, o.european_aqi,
+                   o.pm25, o.pm10, o.no2, o.so2, o.co, o.ozone, o.data_source, o.recorded_at
+            FROM environmental_observations o
+            JOIN cities c ON o.city_id = c.id
+            WHERE ABS(c.latitude - ?) < 0.05 AND ABS(c.longitude - ?) < 0.05
+            ORDER BY o.observation_time DESC
+            LIMIT ?
+        """, (latitude, longitude, safe_limit))
+        return [dict(r) for r in cursor.fetchall()]
+    else:
+        cursor.execute("""
+            SELECT o.id, o.city_id, c.name AS city_name, c.state AS city_state, c.country AS city_country,
+                   c.latitude AS city_latitude, c.longitude AS city_longitude,
+                   o.observation_time, o.temperature, o.relative_humidity,
+                   o.precipitation, o.rain, o.wind_speed, o.aqi, o.aqi_scale, o.european_aqi,
+                   o.pm25, o.pm10, o.no2, o.so2, o.co, o.ozone, o.data_source, o.recorded_at
+            FROM environmental_observations o
+            LEFT JOIN cities c ON o.city_id = c.id
+            ORDER BY o.observation_time DESC
+            LIMIT ?
+        """, (safe_limit,))
+        return [dict(r) for r in cursor.fetchall()]
+
 def get_saved_cities(limit: int = 15) -> list[dict]:
     """Retrieve saved cities along with their latest observation time, grouped by coordinates to avoid duplicates."""
     try:

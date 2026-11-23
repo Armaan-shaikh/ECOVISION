@@ -443,6 +443,7 @@ def analyze_historical_trends(df_daily: pd.DataFrame) -> dict:
             "humidity": round(float(row["humidity_mean"]), 1) if pd.notna(row.get("humidity_mean")) else None,
             "aqi": round(float(row["us_aqi"]), 1) if pd.notna(row.get("us_aqi")) else None,
             "pm25": round(float(row["pm2_5"]), 1) if pd.notna(row.get("pm2_5")) else None,
+            "pm10": round(float(row["pm10"]), 1) if pd.notna(row.get("pm10")) else None,
         })
 
     return {
